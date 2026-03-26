@@ -1,0 +1,22 @@
+<div>
+    <h3>🔗 URL 解析器</h3>
+    <input type="text" id="url" placeholder="输入完整 URL" style="width:100%; background:#010a12; border:1px solid #0ff; padding:0.5rem; color:#0ff; border-radius:8px; margin:0.5rem 0;">
+    <button id="parseBtn" style="background:#0a1a1f; border:1px solid #0ff; color:#0ff; padding:0.4rem 1rem; border-radius:20px; cursor:pointer;">解析</button>
+    <div id="result" class="result" style="background:#021016; border-left:3px solid #0ff; padding:0.5rem; margin-top:0.8rem; font-size:0.8rem;">等待解析...</div>
+</div>
+<script>
+    function parseURL(url) {
+        try {
+            const u = new URL(url);
+            return `协议: ${u.protocol}\n主机名: ${u.hostname}\n端口: ${u.port || '默认'}\n路径: ${u.pathname}\n查询参数: ${u.search || '无'}\n哈希: ${u.hash || '无'}`;
+        } catch(e) {
+            return '无效的 URL';
+        }
+    }
+    document.getElementById('parseBtn').addEventListener('click', () => {
+        const url = document.getElementById('url').value.trim();
+        if (!url) { document.getElementById('result').innerText = '请输入 URL'; return; }
+        const result = parseURL(url);
+        document.getElementById('result').innerText = result;
+    });
+</script>

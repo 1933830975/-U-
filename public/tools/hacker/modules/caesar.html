@@ -1,0 +1,31 @@
+<div>
+    <h3>⚙️ 凯撒密码</h3>
+    <textarea id="caesarInput" rows="3" placeholder="输入文本" style="width:100%; background:#010a12; border:1px solid #0ff; padding:0.5rem; color:#0ff; border-radius:8px; margin:0.5rem 0;"></textarea>
+    <input type="number" id="shift" placeholder="移位量 (1-25)" value="3" style="width:100%; background:#010a12; border:1px solid #0ff; padding:0.5rem; color:#0ff; border-radius:8px; margin:0.5rem 0;">
+    <button id="caesarEncryptBtn" style="background:#0a1a1f; border:1px solid #0ff; color:#0ff; padding:0.4rem 1rem; border-radius:20px; cursor:pointer;">加密</button>
+    <button id="caesarDecryptBtn" style="background:#0a1a1f; border:1px solid #0ff; color:#0ff; padding:0.4rem 1rem; border-radius:20px; cursor:pointer;">解密</button>
+    <div id="caesarResult" class="result" style="background:#021016; border-left:3px solid #0ff; padding:0.5rem; margin-top:0.8rem; font-size:0.8rem;">等待操作...</div>
+</div>
+<script>
+    function caesar(text, shift, decrypt = false) {
+        if (decrypt) shift = (26 - shift) % 26;
+        return text.replace(/[a-zA-Z]/g, c => {
+            const base = c <= 'Z' ? 65 : 97;
+            return String.fromCharCode(((c.charCodeAt(0) - base + shift) % 26) + base);
+        });
+    }
+    document.getElementById('caesarEncryptBtn').addEventListener('click', () => {
+        const text = document.getElementById('caesarInput').value;
+        const shift = parseInt(document.getElementById('shift').value);
+        if (!text) { document.getElementById('caesarResult').innerText = '请输入文本'; return; }
+        const result = caesar(text, shift, false);
+        document.getElementById('caesarResult').innerText = result;
+    });
+    document.getElementById('caesarDecryptBtn').addEventListener('click', () => {
+        const text = document.getElementById('caesarInput').value;
+        const shift = parseInt(document.getElementById('shift').value);
+        if (!text) { document.getElementById('caesarResult').innerText = '请输入文本'; return; }
+        const result = caesar(text, shift, true);
+        document.getElementById('caesarResult').innerText = result;
+    });
+</script>

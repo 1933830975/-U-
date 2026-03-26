@@ -1,0 +1,24 @@
+<div>
+    <h3>📃 XML 格式化</h3>
+    <textarea id="xmlInput" rows="6" placeholder="<root><item>text</item></root>" style="width:100%; background:#010a12; border:1px solid #0ff; padding:0.5rem; color:#0ff; border-radius:8px; margin:0.5rem 0;"></textarea>
+    <button id="formatXmlBtn" style="background:#0a1a1f; border:1px solid #0ff; color:#0ff; padding:0.4rem 1rem; border-radius:20px; cursor:pointer;">格式化</button>
+    <div id="xmlResult" class="result" style="background:#021016; border-left:3px solid #0ff; padding:0.5rem; margin-top:0.8rem; font-size:0.8rem;">等待格式化...</div>
+</div>
+<script>
+    function formatXml(xml) {
+        let formatted = '';
+        let indent = 0;
+        xml.split(/(?<=>)(?=<)/g).forEach(node => {
+            if (node.match(/^<\/\w/)) indent--;
+            formatted += '  '.repeat(indent) + node;
+            if (node.match(/^<\w[^>]*[^/]>$/)) indent++;
+        });
+        return formatted;
+    }
+    document.getElementById('formatXmlBtn').addEventListener('click', () => {
+        const text = document.getElementById('xmlInput').value;
+        if (!text) { document.getElementById('xmlResult').innerText = '请输入 XML'; return; }
+        const result = formatXml(text);
+        document.getElementById('xmlResult').innerText = result;
+    });
+</script>

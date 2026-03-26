@@ -1,0 +1,19 @@
+<div>
+    <h3>🗄️ SQL 格式化</h3>
+    <textarea id="sqlInput" rows="6" placeholder="SELECT id,name FROM users WHERE id=1" style="width:100%; background:#010a12; border:1px solid #0ff; padding:0.5rem; color:#0ff; border-radius:8px; margin:0.5rem 0;"></textarea>
+    <button id="formatSqlBtn" style="background:#0a1a1f; border:1px solid #0ff; color:#0ff; padding:0.4rem 1rem; border-radius:20px; cursor:pointer;">格式化</button>
+    <div id="sqlResult" class="result" style="background:#021016; border-left:3px solid #0ff; padding:0.5rem; margin-top:0.8rem; font-size:0.8rem;">等待格式化...</div>
+</div>
+<script>
+    function formatSql(sql) {
+        // 简单格式化：将 SELECT, FROM, WHERE, AND, OR 等关键字换行
+        let formatted = sql.replace(/\b(SELECT|FROM|WHERE|AND|OR|ORDER BY|GROUP BY|LIMIT)\b/gi, '\n$1');
+        return formatted.replace(/\n+/g, '\n').trim();
+    }
+    document.getElementById('formatSqlBtn').addEventListener('click', () => {
+        const text = document.getElementById('sqlInput').value;
+        if (!text) { document.getElementById('sqlResult').innerText = '请输入 SQL 语句'; return; }
+        const result = formatSql(text);
+        document.getElementById('sqlResult').innerText = result;
+    });
+</script>

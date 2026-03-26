@@ -1,0 +1,40 @@
+<div>
+    <h3>🔨 代码压缩/美化 (JavaScript/CSS/HTML)</h3>
+    <textarea id="codeInput" rows="6" placeholder="输入代码" style="width:100%; background:#010a12; border:1px solid #0ff; padding:0.5rem; color:#0ff; border-radius:8px; margin:0.5rem 0;"></textarea>
+    <select id="codeLang" style="background:#010a12; border:1px solid #0ff; color:#0ff; padding:0.5rem; border-radius:8px; margin-bottom:0.5rem;">
+        <option value="js">JavaScript</option>
+        <option value="css">CSS</option>
+        <option value="html">HTML</option>
+    </select>
+    <button id="beautifyBtn" style="background:#0a1a1f; border:1px solid #0ff; color:#0ff; padding:0.4rem 1rem; border-radius:20px; cursor:pointer;">美化</button>
+    <button id="minifyBtn" style="background:#0a1a1f; border:1px solid #0ff; color:#0ff; padding:0.4rem 1rem; border-radius:20px; cursor:pointer;">压缩</button>
+    <div id="codeResult" class="result" style="background:#021016; border-left:3px solid #0ff; padding:0.5rem; margin-top:0.8rem; font-size:0.8rem;">等待操作...</div>
+</div>
+<script>
+    // 简单美化：添加缩进和换行（仅供参考，实际可使用第三方库）
+    function beautifyJs(code) {
+        try {
+            return JSON.stringify(eval('(' + code + ')'), null, 2);
+        } catch(e) {
+            return code; // 不是对象，返回原样
+        }
+    }
+    function minifyJs(code) {
+        return code.replace(/\s+/g, ' ').trim();
+    }
+    document.getElementById('beautifyBtn').addEventListener('click', () => {
+        const code = document.getElementById('codeInput').value;
+        const lang = document.getElementById('codeLang').value;
+        if (!code) { document.getElementById('codeResult').innerText = '请输入代码'; return; }
+        let result = code;
+        if (lang === 'js') result = beautifyJs(code);
+        else result = code; // 其他语言简单处理
+        document.getElementById('codeResult').innerText = result;
+    });
+    document.getElementById('minifyBtn').addEventListener('click', () => {
+        const code = document.getElementById('codeInput').value;
+        if (!code) { document.getElementById('codeResult').innerText = '请输入代码'; return; }
+        const result = minifyJs(code);
+        document.getElementById('codeResult').innerText = result;
+    });
+</script>

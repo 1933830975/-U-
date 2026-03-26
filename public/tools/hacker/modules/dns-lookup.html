@@ -1,0 +1,30 @@
+<div>
+    <h3>🌍 DNS 查询</h3>
+    <input type="text" id="domain" placeholder="域名" style="width:100%; background:#010a12; border:1px solid #0ff; padding:0.5rem; color:#0ff; border-radius:8px; margin:0.5rem 0;">
+    <button id="lookupBtn" style="background:#0a1a1f; border:1px solid #0ff; color:#0ff; padding:0.4rem 1rem; border-radius:20px; cursor:pointer;">查询 A 记录</button>
+    <div id="result" class="result" style="background:#021016; border-left:3px solid #0ff; padding:0.5rem; margin-top:0.8rem; font-size:0.8rem;">等待查询...</div>
+</div>
+<script>
+    async function dnsLookup(domain) {
+        // 使用 Google DNS over HTTPS API
+        const url = `https://dns.google/resolve?name=${domain}&type=A`;
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+            if (data.Answer) {
+                return data.Answer.map(a => a.data).join('\n');
+            } else {
+                return '未找到记录';
+            }
+        } catch (err) {
+            return '查询失败';
+        }
+    }
+    document.getElementById('lookupBtn').addEventListener('click', async () => {
+        const domain = document.getElementById('domain').value.trim();
+        if (!domain) { document.getElementById('result').innerText = '请输入域名'; return; }
+        document.getElementById('result').innerText = '查询中...';
+        const ips = await dnsLookup(domain);
+        document.getElementById('result').innerText = `域名 ${domain} 的 A 记录:\n${ips}`;
+    });
+</script>

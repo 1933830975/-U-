@@ -1,0 +1,27 @@
+<div>
+    <h3>🔣 Unicode 转换</h3>
+    <textarea id="unicodeInput" rows="3" placeholder="输入文本" style="width:100%; background:#010a12; border:1px solid #0ff; padding:0.5rem; color:#0ff; border-radius:8px; margin:0.5rem 0;"></textarea>
+    <button id="toUnicodeBtn" style="background:#0a1a1f; border:1px solid #0ff; color:#0ff; padding:0.4rem 1rem; border-radius:20px; cursor:pointer;">文本 → Unicode</button>
+    <button id="fromUnicodeBtn" style="background:#0a1a1f; border:1px solid #0ff; color:#0ff; padding:0.4rem 1rem; border-radius:20px; cursor:pointer;">Unicode → 文本</button>
+    <div id="unicodeResult" class="result" style="background:#021016; border-left:3px solid #0ff; padding:0.5rem; margin-top:0.8rem; font-size:0.8rem;">等待转换...</div>
+</div>
+<script>
+    function textToUnicode(str) {
+        return str.split('').map(c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0')).join('');
+    }
+    function unicodeToText(str) {
+        return str.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+    }
+    document.getElementById('toUnicodeBtn').addEventListener('click', () => {
+        const text = document.getElementById('unicodeInput').value;
+        if (!text) { document.getElementById('unicodeResult').innerText = '请输入文本'; return; }
+        const result = textToUnicode(text);
+        document.getElementById('unicodeResult').innerText = result;
+    });
+    document.getElementById('fromUnicodeBtn').addEventListener('click', () => {
+        const text = document.getElementById('unicodeInput').value;
+        if (!text) { document.getElementById('unicodeResult').innerText = '请输入 Unicode 编码'; return; }
+        const result = unicodeToText(text);
+        document.getElementById('unicodeResult').innerText = result;
+    });
+</script>

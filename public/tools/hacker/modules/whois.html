@@ -1,0 +1,17 @@
+<div>
+    <h3>🔎 Whois 查询</h3>
+    <input type="text" id="domain" placeholder="域名" style="width:100%; background:#010a12; border:1px solid #0ff; padding:0.5rem; color:#0ff; border-radius:8px; margin:0.5rem 0;">
+    <button id="whoisBtn" style="background:#0a1a1f; border:1px solid #0ff; color:#0ff; padding:0.4rem 1rem; border-radius:20px; cursor:pointer;">查询</button>
+    <div id="result" class="result" style="background:#021016; border-left:3px solid #0ff; padding:0.5rem; margin-top:0.8rem; font-size:0.8rem;">等待查询...</div>
+</div>
+<script>
+    // 使用 whois-api 代理，由于 CORS 限制，实际需要后端代理。此处模拟数据
+    function simulateWhois(domain) {
+        return `域名: ${domain}\n注册商: Example Registrar\n创建时间: 2020-01-01\n过期时间: 2025-01-01\nDNS: ns1.example.com, ns2.example.com`;
+    }
+    document.getElementById('whoisBtn').addEventListener('click', () => {
+        const domain = document.getElementById('domain').value.trim();
+        if (!domain) { document.getElementById('result').innerText = '请输入域名'; return; }
+        document.getElementById('result').innerText = simulateWhois(domain);
+    });
+</script>

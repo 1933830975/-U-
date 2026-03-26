@@ -1,0 +1,17 @@
+<div>
+    <h3>🖼️ 图片转 Base64</h3>
+    <input type="file" id="imageFile" accept="image/*" style="width:100%; background:#010a12; border:1px solid #0ff; padding:0.5rem; color:#0ff; border-radius:8px; margin:0.5rem 0;">
+    <button id="convertBtn" style="background:#0a1a1f; border:1px solid #0ff; color:#0ff; padding:0.4rem 1rem; border-radius:20px; cursor:pointer;">转换</button>
+    <div id="base64Result" class="result" style="background:#021016; border-left:3px solid #0ff; padding:0.5rem; margin-top:0.8rem; font-size:0.8rem; word-break:break-all;">等待转换...</div>
+</div>
+<script>
+    document.getElementById('convertBtn').addEventListener('click', () => {
+        const file = document.getElementById('imageFile').files[0];
+        if (!file) { document.getElementById('base64Result').innerText = '请选择图片'; return; }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('base64Result').innerText = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+</script>

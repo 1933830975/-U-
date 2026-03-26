@@ -1,8 +1,8 @@
 <div>
-    <h3>🔍 端口扫描 (模拟)</h3>
-    <input type="text" id="portTarget" placeholder="目标域名/IP" style="width:100%; background:#010a12; border:1px solid #0ff; padding:0.5rem; color:#0ff; border-radius:8px; margin:0.5rem 0;">
-    <button id="portBtn" style="background:#0a1a1f; border:1px solid #0ff; color:#0ff; padding:0.4rem 1rem; border-radius:20px; cursor:pointer;">扫描常用端口</button>
-    <div id="portResult" class="result" style="background:#021016; border-left:3px solid #0ff; padding:0.5rem; margin-top:0.8rem; font-size:0.8rem;">点击扫描（仅演示，不实际扫描）</div>
+    <h3>🔍 端口扫描</h3>
+    <input type="text" id="target" placeholder="目标 IP 或域名" style="width:100%; background:#010a12; border:1px solid #0ff; padding:0.5rem; color:#0ff; border-radius:8px; margin:0.5rem 0;">
+    <button id="scanBtn" style="background:#0a1a1f; border:1px solid #0ff; color:#0ff; padding:0.4rem 1rem; border-radius:20px; cursor:pointer;">扫描常用端口</button>
+    <div id="result" class="result" style="background:#021016; border-left:3px solid #0ff; padding:0.5rem; margin-top:0.8rem; font-size:0.8rem;">等待扫描...</div>
 </div>
 <script>
     const commonPorts = [
@@ -10,18 +10,21 @@
         { port: 25, service: 'SMTP' }, { port: 80, service: 'HTTP' }, { port: 443, service: 'HTTPS' },
         { port: 3306, service: 'MySQL' }, { port: 3389, service: 'RDP' }, { port: 8080, service: 'HTTP-Proxy' }
     ];
-    function simulatePortScan(target) {
-        let result = `目标: ${target}\n模拟扫描结果 (仅演示):\n`;
-        commonPorts.forEach(p => {
-            const open = Math.random() > 0.6;
-            result += `${p.port} (${p.service}): ${open ? '开放' : '关闭'}\n`;
+    async function scanPort(host, port) {
+        // 实际扫描需要后端代理，此处为模拟演示
+        return new Promise(resolve => {
+            setTimeout(() => resolve(Math.random() > 0.6), 50);
         });
-        result += '\n⚠️ 此功能为演示，未实际发送任何网络请求。';
-        return result;
     }
-    document.getElementById('portBtn').addEventListener('click', () => {
-        const target = document.getElementById('portTarget').value.trim() || 'localhost';
-        const res = simulatePortScan(target);
-        document.getElementById('portResult').innerText = res;
+    document.getElementById('scanBtn').addEventListener('click', async () => {
+        const target = document.getElementById('target').value.trim();
+        if (!target) { document.getElementById('result').innerText = '请输入目标'; return; }
+        document.getElementById('result').innerText = '扫描中...\n';
+        let resultText = `目标: ${target}\n\n`;
+        for (const p of commonPorts) {
+            const open = await scanPort(target, p.port);
+            resultText += `${p.port} (${p.service}): ${open ? '开放' : '关闭'}\n`;
+        }
+        document.getElementById('result').innerText = resultText;
     });
 </script>

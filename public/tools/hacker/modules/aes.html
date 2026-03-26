@@ -1,0 +1,29 @@
+<div>
+    <h3>🔐 AES 加密/解密</h3>
+    <textarea id="aesInput" rows="3" placeholder="输入文本" style="width:100%; background:#010a12; border:1px solid #0ff; padding:0.5rem; color:#0ff; border-radius:8px; margin:0.5rem 0;"></textarea>
+    <input type="text" id="aesKey" placeholder="密钥 (16/24/32字符)" style="width:100%; background:#010a12; border:1px solid #0ff; padding:0.5rem; color:#0ff; border-radius:8px; margin:0.5rem 0;">
+    <button id="aesEncryptBtn" style="background:#0a1a1f; border:1px solid #0ff; color:#0ff; padding:0.4rem 1rem; border-radius:20px; cursor:pointer;">加密</button>
+    <button id="aesDecryptBtn" style="background:#0a1a1f; border:1px solid #0ff; color:#0ff; padding:0.4rem 1rem; border-radius:20px; cursor:pointer;">解密</button>
+    <div id="aesResult" class="result" style="background:#021016; border-left:3px solid #0ff; padding:0.5rem; margin-top:0.8rem; font-size:0.8rem;">等待操作...</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script>
+    document.getElementById('aesEncryptBtn').addEventListener('click', () => {
+        const text = document.getElementById('aesInput').value;
+        const key = document.getElementById('aesKey').value;
+        if (!text || !key) { document.getElementById('aesResult').innerText = '请填写文本和密钥'; return; }
+        const encrypted = CryptoJS.AES.encrypt(text, key).toString();
+        document.getElementById('aesResult').innerText = `加密结果:\n${encrypted}`;
+    });
+    document.getElementById('aesDecryptBtn').addEventListener('click', () => {
+        const text = document.getElementById('aesInput').value;
+        const key = document.getElementById('aesKey').value;
+        if (!text || !key) { document.getElementById('aesResult').innerText = '请填写密文和密钥'; return; }
+        try {
+            const decrypted = CryptoJS.AES.decrypt(text, key).toString(CryptoJS.enc.Utf8);
+            document.getElementById('aesResult').innerText = `解密结果:\n${decrypted}`;
+        } catch(e) {
+            document.getElementById('aesResult').innerText = '解密失败，密钥或密文错误';
+        }
+    });
+</script>

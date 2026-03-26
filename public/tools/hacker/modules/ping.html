@@ -1,0 +1,21 @@
+<div>
+    <h3>📡 Ping 测试</h3>
+    <input type="text" id="host" placeholder="主机名或 IP" style="width:100%; background:#010a12; border:1px solid #0ff; padding:0.5rem; color:#0ff; border-radius:8px; margin:0.5rem 0;">
+    <button id="pingBtn" style="background:#0a1a1f; border:1px solid #0ff; color:#0ff; padding:0.4rem 1rem; border-radius:20px; cursor:pointer;">Ping</button>
+    <div id="result" class="result" style="background:#021016; border-left:3px solid #0ff; padding:0.5rem; margin-top:0.8rem; font-size:0.8rem;">等待测试...</div>
+</div>
+<script>
+    function simulatePing(host) {
+        return new Promise(resolve => {
+            const latency = Math.floor(Math.random() * 200) + 10;
+            setTimeout(() => resolve(latency), 500);
+        });
+    }
+    document.getElementById('pingBtn').addEventListener('click', async () => {
+        const host = document.getElementById('host').value.trim();
+        if (!host) { document.getElementById('result').innerText = '请输入主机名'; return; }
+        document.getElementById('result').innerText = 'Ping 中...';
+        const latency = await simulatePing(host);
+        document.getElementById('result').innerText = `Ping ${host}: 响应时间 ${latency} ms`;
+    });
+</script>

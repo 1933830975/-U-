@@ -1,0 +1,31 @@
+<div>
+    <h3>🔢 进制转换</h3>
+    <input type="text" id="baseNumber" placeholder="数字" style="width:100%; background:#010a12; border:1px solid #0ff; padding:0.5rem; color:#0ff; border-radius:8px; margin:0.5rem 0;">
+    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+        <select id="fromBase" style="background:#010a12; border:1px solid #0ff; color:#0ff; padding:0.5rem; border-radius:8px;">
+            <option value="2">二进制</option><option value="8">八进制</option><option value="10" selected>十进制</option><option value="16">十六进制</option>
+        </select>
+        <span style="color:#0ff;">→</span>
+        <select id="toBase" style="background:#010a12; border:1px solid #0ff; color:#0ff; padding:0.5rem; border-radius:8px;">
+            <option value="2">二进制</option><option value="8">八进制</option><option value="10">十进制</option><option value="16" selected>十六进制</option>
+        </select>
+    </div>
+    <button id="convertBtn" style="background:#0a1a1f; border:1px solid #0ff; color:#0ff; padding:0.4rem 1rem; border-radius:20px; cursor:pointer;">转换</button>
+    <div id="convertResult" class="result" style="background:#021016; border-left:3px solid #0ff; padding:0.5rem; margin-top:0.8rem; font-size:0.8rem;">等待转换...</div>
+</div>
+<script>
+    document.getElementById('convertBtn').addEventListener('click', () => {
+        const numStr = document.getElementById('baseNumber').value.trim();
+        const fromBase = parseInt(document.getElementById('fromBase').value);
+        const toBase = parseInt(document.getElementById('toBase').value);
+        if (!numStr) { document.getElementById('convertResult').innerText = '请输入数字'; return; }
+        try {
+            const decimal = parseInt(numStr, fromBase);
+            if (isNaN(decimal)) throw new Error();
+            const result = decimal.toString(toBase);
+            document.getElementById('convertResult').innerText = `${numStr} (${fromBase}进制) = ${result} (${toBase}进制)`;
+        } catch(e) {
+            document.getElementById('convertResult').innerText = '无效的数字';
+        }
+    });
+</script>

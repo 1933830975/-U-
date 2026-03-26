@@ -1,0 +1,28 @@
+<div>
+    <h3>📧 邮箱格式推测</h3>
+    <input type="text" id="domain" placeholder="域名 (如 example.com)" style="width:100%; background:#010a12; border:1px solid #0ff; padding:0.5rem; color:#0ff; border-radius:8px; margin:0.5rem 0;">
+    <input type="text" id="name" placeholder="姓名 (如 johndoe)" style="width:100%; background:#010a12; border:1px solid #0ff; padding:0.5rem; color:#0ff; border-radius:8px; margin:0.5rem 0;">
+    <button id="guessBtn" style="background:#0a1a1f; border:1px solid #0ff; color:#0ff; padding:0.4rem 1rem; border-radius:20px; cursor:pointer;">推测邮箱</button>
+    <div id="result" class="result" style="background:#021016; border-left:3px solid #0ff; padding:0.5rem; margin-top:0.8rem; font-size:0.8rem;">等待推测...</div>
+</div>
+<script>
+    function guessEmail(domain, name) {
+        const patterns = [
+            name, `${name}@${domain}`,
+            `${name}.${domain}`,
+            `${name}@${domain}`,
+            `${name}@${domain}`,
+            `${name}@${domain}`,
+            `${name}@${domain}`
+        ];
+        // 实际可从数据库或 API 获取常用格式
+        return `可能的邮箱:\n- ${name}@${domain}\n- ${name.split('.')[0]}@${domain}\n- ${name.charAt(0)}${name.split('.')[1]}@${domain}`;
+    }
+    document.getElementById('guessBtn').addEventListener('click', () => {
+        const domain = document.getElementById('domain').value.trim();
+        const name = document.getElementById('name').value.trim();
+        if (!domain || !name) { document.getElementById('result').innerText = '请填写域名和姓名'; return; }
+        const result = guessEmail(domain, name);
+        document.getElementById('result').innerText = result;
+    });
+</script>

@@ -27,6 +27,11 @@ const TRONGRID_API = 'https://api.trongrid.io';
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 const ERC_USDT_CONTRACT = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
 
+if (!ETHERSCAN_API_KEY) {
+    console.warn('⚠️ 警告: 未设置 ETHERSCAN_API_KEY，ERC20 查询将失败');
+}
+
+// TRC20 余额查询
 async function getTrcBalance(address) {
     try {
         const url = `${TRONGRID_API}/v1/accounts/${address}`;
@@ -51,6 +56,7 @@ async function getTrcBalance(address) {
     }
 }
 
+// TRC20 交易记录
 async function getTrcTransactions(address, limit = 30) {
     try {
         const url = `${TRONGRID_API}/v1/accounts/${address}/transactions/trc20?limit=${limit}&contract_address=${TRC_USDT_CONTRACT}&only_confirmed=true`;
@@ -70,6 +76,7 @@ async function getTrcTransactions(address, limit = 30) {
     }
 }
 
+// ERC20 余额查询
 async function getErcBalance(address) {
     if (!ETHERSCAN_API_KEY) {
         return { usdtBalance: '0.000000', error: 'Etherscan API Key 未配置' };
@@ -90,6 +97,7 @@ async function getErcBalance(address) {
     }
 }
 
+// ERC20 交易记录
 async function getErcTransactions(address, limit = 30) {
     if (!ETHERSCAN_API_KEY) return [];
     try {
@@ -152,6 +160,107 @@ app.get('/api/transactions', async (req, res) => {
     }
 });
 
+// ========== CVE 漏洞数据库代理 ==========
+const CVE_API_BASE = 'https://services.nvd.nist.gov/rest/json/cves/2.0';
+
+app.get('/api/cve', async (req, res) => {
+    const keyword = req.query.keyword;
+    const startIndex = parseInt(req.query.startIndex) || 0;
+    const resultsPerPage = 20;
+
+    if (!keyword) {
+        return res.status(400).json({ error: '需要提供搜索关键词' });
+    }
+
+    try {
+        const url = `${CVE_API_BASE}?keywordSearch=${encodeURIComponent(keyword)}&startIndex=${startIndex}&resultsPerPage=${resultsPerPage}`;
+        const response = await axios.get(url);
+        const data = response.data;
+
+        const vulnerabilities = data.vulnerabilities.map(vul => {
+            const cve = vul.cve;
+            const metrics = cve.metrics?.cvssMetricV31?.[0]?.cvssData || 
+                           cve.metrics?.cvssMetricV2?.[0]?.cvssData;
+            const score = metrics?.baseScore || 'N/A';
+            const severity = metrics?.baseSeverity || (score >= 7 ? 'HIGH' : score >= 4 ? 'MEDIUM' : 'LOW');
+            return {
+                id: cve.id,
+                description: cve.descriptions.find(d => d.lang === 'en')?.value || '无描述',
+                published: cve.published,
+                score: score,
+                severity: severity,
+                url: `https://nvd.nist.gov/vuln/detail/${cve.id}`
+            };
+        });
+
+        res.json({
+            success: true,
+            totalResults: data.totalResults,
+            results: vulnerabilities,
+            startIndex: data.startIndex,
+            resultsPerPage: data.resultsPerPage
+        });
+    } catch (err) {
+        console.error('CVE API 错误:', err.message);
+        res.status(500).json({ error: '查询失败，请稍后重试' });
+    }
+});
+
+// ========== 数据泄露查询（Have I Been Pwned） ==========
+const HIBP_API_BASE = 'https://haveibeenpwned.com/api/v3';
+const HIBP_API_KEY = process.env.HIBP_API_KEY;
+
+if (!HIBP_API_KEY) {
+    console.warn('⚠️ 警告: 未设置 HIBP_API_KEY，数据泄露查询将不可用');
+}
+
+app.get('/api/breach', async (req, res) => {
+    const account = req.query.account;
+    if (!account) {
+        return res.status(400).json({ error: '需要提供邮箱或手机号' });
+    }
+
+    if (!HIBP_API_KEY) {
+        return res.status(500).json({ error: '后端未配置 HIBP API Key' });
+    }
+
+    try {
+        const url = `${HIBP_API_BASE}/breachedaccount/${encodeURIComponent(account)}?truncateResponse=false`;
+        const response = await axios.get(url, {
+            headers: {
+                'hibp-api-key': HIBP_API_KEY,
+                'User-Agent': 'USDT-Toolbox'
+            }
+        });
+
+        const breaches = response.data;
+        const breachList = breaches.map(breach => ({
+            name: breach.Name,
+            title: breach.Title,
+            date: breach.BreachDate,
+            description: breach.Description,
+            addedDate: breach.AddedDate,
+            pwnCount: breach.PwnCount,
+            domains: breach.Domain
+        }));
+
+        res.json({
+            success: true,
+            pwned: true,
+            count: breachList.length,
+            breaches: breachList
+        });
+    } catch (error) {
+        if (error.response && error.response.status === 404) {
+            res.json({ success: true, pwned: false, count: 0, breaches: [] });
+        } else {
+            console.error('HIBP API 错误:', error.message);
+            res.status(500).json({ error: '查询失败，请稍后重试' });
+        }
+    }
+});
+
+// 启动服务
 app.listen(PORT, () => {
     console.log(`🚀 服务已启动: http://localhost:${PORT}`);
     console.log(`📁 工具导航: http://localhost:${PORT}/`);

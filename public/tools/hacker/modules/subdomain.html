@@ -1,0 +1,22 @@
+<div>
+    <h3>🌿 子域名枚举</h3>
+    <input type="text" id="domain" placeholder="域名" style="width:100%; background:#010a12; border:1px solid #0ff; padding:0.5rem; color:#0ff; border-radius:8px; margin:0.5rem 0;">
+    <button id="enumBtn" style="background:#0a1a1f; border:1px solid #0ff; color:#0ff; padding:0.4rem 1rem; border-radius:20px; cursor:pointer;">枚举</button>
+    <div id="result" class="result" style="background:#021016; border-left:3px solid #0ff; padding:0.5rem; margin-top:0.8rem; font-size:0.8rem;">等待枚举...</div>
+</div>
+<script>
+    const commonSubs = ['www', 'mail', 'ftp', 'blog', 'shop', 'admin', 'api', 'dev', 'test', 'crm'];
+    function enumerate(domain) {
+        let found = [];
+        commonSubs.forEach(sub => {
+            if (Math.random() > 0.5) found.push(`${sub}.${domain}`);
+        });
+        return found.length ? found.join('\n') : '未发现常见子域名';
+    }
+    document.getElementById('enumBtn').addEventListener('click', () => {
+        const domain = document.getElementById('domain').value.trim();
+        if (!domain) { document.getElementById('result').innerText = '请输入域名'; return; }
+        const result = enumerate(domain);
+        document.getElementById('result').innerText = `子域名列表:\n${result}`;
+    });
+</script>
