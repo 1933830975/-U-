@@ -1,0 +1,13 @@
+{
+  "name": "usdt-tool",
+  "version": "1.0.0",
+  "description": "USDT address manager with TRC20 and ERC20 support",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.6.0"
+  }
+}

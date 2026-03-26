@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>USDT 地址管理器 | 霓虹终端</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(circle at 20% 30%, #0a0f1a, #03060c);
+            font-family: 'Share Tech Mono', 'Fira Code', 'Courier New', monospace;
+            min-height: 100vh;
+            padding: 1.5rem;
+            color: #0ff;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 24px 24px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+            backdrop-filter: blur(2px);
+        }
+
+        .header {
+            border-bottom: 2px solid #0ff;
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-shadow: 0 0 6px #0ff;
+        }
+
+        .stats {
+            font-size: 0.8rem;
+            background: #0a0f1a;
+            padding: 0.3rem 1rem;
+            border: 1px solid #0ff;
+            border-radius: 20px;
+        }
+
+        .card {
+            background: rgba(8, 16, 24, 0.75);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 255, 255, 0.5);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 0 18px rgba(0, 255, 255, 0.1);
+        }
+
+        .address-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .address-table th {
+            text-align: left;
+            padding: 0.8rem 0.5rem;
+            border-bottom: 2px solid #0ff;
+            color: #9effff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .address-table td {
+            padding: 0.8rem 0.5rem;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            font-family: monospace;
+            word-break: break-all;
+        }
+
+        .address-table tr:hover {
+            background: rgba(0, 255, 255, 0.08);
+        }
+
+        .chain-badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .trc { background: #0a6; color: #000; border: 1px solid #0ff; }
+        .erc { background: #a06; color: #fff; border: 1px solid #f0f; }
+
+        .delete-btn {
+            background: none;
+            border: 1px solid #ff3366;
+            color: #ff3366;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            transition: 0.2s;
+        }
+        .delete-btn:hover {
+            background: #ff3366;
+            color: #000;
+            box-shadow: 0 0 8px #ff3366;
+        }
+
+        .add-area {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+        .add-input {
+            flex: 3;
+            background: #010a12;
+            border: 1px solid #0ff;
+            padding: 0.8rem 1rem;
+            font-family: monospace;
+            color: #0ff;
+            border-radius: 12px;
+            outline: none;
+        }
+        .add-input:focus {
+            border-color: #ff00cc;
+            box-shadow: 0 0 10px #ff00cc;
+        }
+        .action-btn {
+            background: rgba(0, 20, 30, 0.9);
+            border: 1.5px solid #0ff;
+            color: #0ff;
+            padding: 0.8rem 1.5rem;
+            font-family: monospace;
+            font-weight: bold;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .action-btn:hover {
+            background: #0ff;
+            color: #000;
+            box-shadow: 0 0 15px #0ff;
+        }
+
+        .summary {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        .summary-item {
+            background: rgba(0, 20, 30, 0.6);
+            border-left: 4px solid #0ff;
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            flex: 1;
+            min-width: 180px;
+        }
+        .summary-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .summary-value {
+            font-size: 1.6rem;
+            font-weight: bold;
+            word-break: break-word;
+        }
+
+        .error-msg {
+            background: rgba(255, 30, 80, 0.2);
+            border-left: 5px solid #ff3366;
+            padding: 0.8rem;
+            margin: 1rem 0;
+            border-radius: 10px;
+            color: #ff7b9c;
+        }
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #0ff;
+        }
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #0ff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 700px) {
+            body { padding: 1rem; }
+            .summary-value { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="title">>_ USDT_Addr_Manager</div>
+        <div class="stats">⚡ 多链探针 | TRC20 + ERC20</div>
+    </div>
+
+    <div class="summary" id="summaryArea">
+        <div class="summary-item"><div class="summary-label">TRC USDT 总余额</div><div class="summary-value" id="trcTotal">0.00</div></div>
+        <div class="summary-item"><div class="summary-label">ERC USDT 总余额</div><div class="summary-value" id="ercTotal">0.00</div></div>
+        <div class="summary-item"><div class="summary-label">当前页总余额</div><div class="summary-value" id="totalAll">0.00</div></div>
+    </div>
+
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+            <span>📋 地址列表</span>
+            <button id="refreshBtn" class="action-btn" style="padding: 0.4rem 1rem;">⟳ 刷新余额</button>
+        </div>
+        <div style="overflow-x: auto;">
+            <table class="address-table" id="addressTable">
+                <thead>
+                    <tr><th>地址</th><th>链类型</th><th>USDT余额</th><th>TRX余额</th><th>操作</th></tr>
+                </thead>
+                <tbody id="addressTableBody">
+                    <tr><td colspan="5" style="text-align:center;">加载中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="add-area">
+            <input type="text" id="newAddress" class="add-input" placeholder="输入 TRC20 (T开头) 或 ERC20 (0x开头) 地址">
+            <button id="addBtn" class="action-btn">+ 添加地址</button>
+        </div>
+    </div>
+    <div id="messageArea"></div>
+</div>
+
+<script>
+    const API_BASE = '/api';
+    let currentAddresses = [];
+
+    function showMessage(msg, isError = false) {
+        const msgDiv = document.getElementById('messageArea');
+        msgDiv.innerHTML = `<div class="${isError ? 'error-msg' : ''}" style="background:#021016; padding:0.6rem; border-radius:10px;">${escapeHtml(msg)}</div>`;
+        setTimeout(() => { if (msgDiv.innerHTML === `<div class="${isError ? 'error-msg' : ''}" style="background:#021016; padding:0.6rem; border-radius:10px;">${escapeHtml(msg)}</div>`) msgDiv.innerHTML = ''; }, 4000);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    async function fetchAddresses() {
+        try {
+            const res = await fetch(`${API_BASE}/addresses`);
+            if (!res.ok) throw new Error('获取地址列表失败');
+            const data = await res.json();
+            currentAddresses = data.addresses || [];
+            renderAddressTable();
+            return currentAddresses;
+        } catch (err) {
+            showMessage('获取地址列表失败: ' + err.message, true);
+            return [];
+        }
+    }
+
+    async function refreshBalances() {
+        if (currentAddresses.length === 0) {
+            showMessage('暂无地址，请先添加');
+            updateSummary([]);
+            return;
+        }
+        showMessage('正在查询所有地址余额...');
+        try {
+            const res = await fetch(`${API_BASE}/balances`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ addresses: currentAddresses })
+            });
+            if (!res.ok) throw new Error('余额查询失败');
+            const balances = await res.json();
+            renderAddressTable(balances);
+            updateSummary(balances);
+        } catch (err) {
+            showMessage('余额刷新失败: ' + err.message, true);
+        }
+    }
+
+    function updateSummary(balances) {
+        let trcTotal = 0, ercTotal = 0;
+        balances.forEach(item => {
+            const usdt = parseFloat(item.usdtBalance) || 0;
+            if (item.type === 'trc') trcTotal += usdt;
+            else if (item.type === 'erc') ercTotal += usdt;
+        });
+        const totalAll = trcTotal + ercTotal;
+        document.getElementById('trcTotal').innerText = trcTotal.toFixed(6);
+        document.getElementById('ercTotal').innerText = ercTotal.toFixed(6);
+        document.getElementById('totalAll').innerText = totalAll.toFixed(6);
+    }
+
+    function renderAddressTable(balancesData = null) {
+        const tbody = document.getElementById('addressTableBody');
+        if (!currentAddresses.length) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">暂无地址，请添加</td></tr>';
+            return;
+        }
+
+        const balanceMap = {};
+        if (balancesData) {
+            balancesData.forEach(b => { balanceMap[b.address] = b; });
+        }
+
+        tbody.innerHTML = '';
+        currentAddresses.forEach(addr => {
+            const info = balanceMap[addr] || { usdtBalance: '?', trxBalance: '?', type: detectChainType(addr) };
+            const typeClass = info.type === 'trc' ? 'trc' : 'erc';
+            const typeLabel = info.type === 'trc' ? 'TRC20' : 'ERC20';
+            const usdtDisplay = info.usdtBalance !== undefined && info.usdtBalance !== null ? parseFloat(info.usdtBalance).toFixed(6) : '查询中';
+            const trxDisplay = info.type === 'trc' ? (info.trxBalance !== undefined ? parseFloat(info.trxBalance).toFixed(6) : '?') : '—';
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td title="${escapeHtml(addr)}">${escapeHtml(shortenAddress(addr))}</td>
+                <td><span class="chain-badge ${typeClass}">${typeLabel}</span></td>
+                <td>${usdtDisplay}</td>
+                <td>${trxDisplay}</td>
+                <td><button class="delete-btn" data-addr="${escapeHtml(addr)}">删除</button></td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const addr = btn.getAttribute('data-addr');
+                await deleteAddress(addr);
+            });
+        });
+    }
+
+    function shortenAddress(addr) {
+        if (!addr) return '';
+        if (addr.length <= 16) return addr;
+        return addr.slice(0, 8) + '...' + addr.slice(-6);
+    }
+
+    function detectChainType(address) {
+        if (address.startsWith('0x')) return 'erc';
+        if (address.startsWith('T') && address.length === 34) return 'trc';
+        return 'unknown';
+    }
+
+    async function addAddress(address) {
+        const type = detectChainType(address);
+        if (type === 'unknown') {
+            showMessage('地址格式无效，必须是TRC20(T开头34位)或ERC20(0x开头42位)', true);
+            return false;
+        }
+        try {
+            const res = await fetch(`${API_BASE}/addresses`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ address, type })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || '添加失败');
+            showMessage('地址添加成功');
+            await fetchAddresses();
+            await refreshBalances();
+            return true;
+        } catch (err) {
+            showMessage('添加失败: ' + err.message, true);
+            return false;
+        }
+    }
+
+    async function deleteAddress(address) {
+        if (!confirm(`确定要删除地址 ${address} 吗？`)) return;
+        try {
+            const res = await fetch(`${API_BASE}/addresses/${encodeURIComponent(address)}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || '删除失败');
+            showMessage('地址已删除');
+            await fetchAddresses();
+            await refreshBalances();
+        } catch (err) {
+            showMessage('删除失败: ' + err.message, true);
+        }
+    }
+
+    async function init() {
+        await fetchAddresses();
+        if (currentAddresses.length > 0) {
+            await refreshBalances();
+        } else {
+            updateSummary([]);
+        }
+    }
+
+    document.getElementById('refreshBtn').addEventListener('click', () => refreshBalances());
+    document.getElementById('addBtn').addEventListener('click', () => {
+        const addrInput = document.getElementById('newAddress');
+        const addr = addrInput.value.trim();
+        if (addr) {
+            addAddress(addr);
+            addrInput.value = '';
+        } else {
+            showMessage('请输入地址', true);
+        }
+    });
+
+    init();
+</script>
+</body>
+</html>
