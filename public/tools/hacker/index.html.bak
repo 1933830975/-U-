@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>黑客工具包 | 霓虹终端</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: radial-gradient(circle at 20% 30%, #0a0f1a, #03060c);
+            font-family: 'Share Tech Mono', 'Fira Code', monospace;
+            min-height: 100vh;
+            padding: 1.5rem;
+            color: #0ff;
+            position: relative;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(0,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,255,0.03) 1px, transparent 1px);
+            background-size: 24px 24px;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+        .header {
+            border-bottom: 2px solid #0ff;
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .title {
+            font-size: 2rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-shadow: 0 0 6px #0ff;
+        }
+        .stats {
+            font-size: 0.8rem;
+            background: #0a0f1a;
+            padding: 0.3rem 1rem;
+            border: 1px solid #0ff;
+            border-radius: 20px;
+        }
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .tool-card {
+            background: rgba(8,16,24,0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0,255,255,0.5);
+            border-radius: 20px;
+            padding: 1.2rem;
+            transition: 0.2s;
+        }
+        .tool-card h3 {
+            margin-bottom: 0.8rem;
+            color: #0ff;
+            border-left: 3px solid #0ff;
+            padding-left: 0.8rem;
+        }
+        .tool-card input, .tool-card textarea {
+            width: 100%;
+            background: #010a12;
+            border: 1px solid #0ff;
+            padding: 0.5rem;
+            color: #0ff;
+            font-family: monospace;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+        }
+        .tool-card button {
+            background: rgba(0,20,30,0.9);
+            border: 1px solid #0ff;
+            color: #0ff;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: monospace;
+            margin-right: 0.5rem;
+        }
+        .tool-card button:hover {
+            background: #0ff;
+            color: #000;
+            box-shadow: 0 0 8px #0ff;
+        }
+        .result {
+            background: #021016;
+            border-left: 3px solid #0ff;
+            padding: 0.5rem;
+            margin-top: 0.8rem;
+            font-size: 0.8rem;
+            word-break: break-all;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .footer {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #0ff6;
+            border-top: 1px dashed #0ff3;
+            padding-top: 1.5rem;
+        }
+        @media (max-width: 700px) {
+            body { padding: 1rem; }
+            .title { font-size: 1.4rem; }
+            .tools-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="title">>_ HACKER_TOOLKIT</div>
+        <div class="stats">⚡ 网络安全工具集 | 纯前端实现</div>
+    </div>
+    <div class="tools-grid">
+        <!-- IP 查询 -->
+        <div class="tool-card">
+            <h3>🌐 IP 归属地查询</h3>
+            <input type="text" id="ipInput" placeholder="输入 IP 地址" value="">
+            <button id="ipBtn">查询</button>
+            <div class="result" id="ipResult">等待查询...</div>
+        </div>
+
+        <!-- 端口扫描模拟 -->
+        <div class="tool-card">
+            <h3>🔍 端口扫描 (模拟)</h3>
+            <input type="text" id="portTarget" placeholder="目标域名/IP" value="">
+            <button id="portBtn">扫描常用端口</button>
+            <div class="result" id="portResult">点击扫描（仅演示，不实际扫描）</div>
+        </div>
+
+        <!-- 密码强度检测 -->
+        <div class="tool-card">
+            <h3>🔐 密码强度检测</h3>
+            <input type="text" id="passwordInput" placeholder="输入密码">
+            <button id="pwdBtn">检测强度</button>
+            <div class="result" id="pwdResult">等待检测...</div>
+        </div>
+
+        <!-- MD5 加密 -->
+        <div class="tool-card">
+ 

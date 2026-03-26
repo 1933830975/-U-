@@ -16,7 +16,7 @@ app.get('/', (req, res) => {
 
 // USDT 地址管理器
 app.get('/usdt', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'tools', 'USDT', 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'tools', 'USDT','hacker'， 'index.html'));
 });
 
 // 未来新工具只需添加类似路由，例如：
