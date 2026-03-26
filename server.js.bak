@@ -1,45 +1,36 @@
 const express = require('express');
-const fs = require('fs').promises;
-const path = require('path');
 const axios = require('axios');
+const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const DATA_FILE = path.join(__dirname, 'addresses.json');
-
+// 中间件
 app.use(express.json());
-app.use(express.static('public')); // 前端静态文件放在 public 目录
+app.use(express.static('public')); // 提供静态文件（CSS、图片等）
+
+// ========== 工具路由 ==========
+// 导航首页
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// 读取地址列表（文件存储，重启会丢失）
-async function readAddresses() {
-    try {
-        const data = await fs.readFile(DATA_FILE, 'utf8');
-        return JSON.parse(data);
-    } catch (err) {
-        return [];
-    }
-}
+// USDT 地址管理器
+app.get('/usdt', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'tools', 'usdt', 'index.html'));
+});
 
-async function writeAddresses(addresses) {
-    await fs.writeFile(DATA_FILE, JSON.stringify(addresses, null, 2));
-}
+// 未来新工具只需添加类似路由，例如：
+// app.get('/price', (req, res) => {
+//     res.sendFile(path.join(__dirname, 'public', 'tools', 'price', 'index.html'));
+// });
 
-// TRC20 配置
+// ========== API 路由（USDT 工具使用）==========
 const TRC_USDT_CONTRACT = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
 const TRONGRID_API = 'https://api.trongrid.io';
-
-// ERC20 配置
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 const ERC_USDT_CONTRACT = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
 
-if (!ETHERSCAN_API_KEY) {
-    console.warn('⚠️ 警告: 未设置 ETHERSCAN_API_KEY，ERC20 查询将失败');
-}
-
-// 查询 TRC20 地址的余额和 TRX
+// TRC20 余额查询
 async function getTrcBalance(address) {
     try {
         const url = `${TRONGRID_API}/v1/accounts/${address}`;
@@ -49,7 +40,6 @@ async function getTrcBalance(address) {
         }
         const account = resp.data.data[0];
         const trxBalance = (account.balance / 1e6).toFixed(6);
-
         let usdtBalance = 0;
         const trc20Tokens = account.trc20 || [];
         for (const token of trc20Tokens) {
@@ -65,7 +55,7 @@ async function getTrcBalance(address) {
     }
 }
 
-// 查询 TRC20 交易记录（最近30笔）
+// TRC20 交易记录
 async function getTrcTransactions(address, limit = 30) {
     try {
         const url = `${TRONGRID_API}/v1/accounts/${address}/transactions/trc20?limit=${limit}&contract_address=${TRC_USDT_CONTRACT}&only_confirmed=true`;
@@ -85,7 +75,7 @@ async function getTrcTransactions(address, limit = 30) {
     }
 }
 
-// 查询 ERC20 余额
+// ERC20 余额查询
 async function getErcBalance(address) {
     if (!ETHERSCAN_API_KEY) {
         return { usdtBalance: '0.000000', error: 'Etherscan API Key 未配置' };
@@ -106,7 +96,7 @@ async function getErcBalance(address) {
     }
 }
 
-// 查询 ERC20 交易记录
+// ERC20 交易记录
 async function getErcTransactions(address, limit = 30) {
     if (!ETHERSCAN_API_KEY) return [];
     try {
@@ -128,50 +118,7 @@ async function getErcTransactions(address, limit = 30) {
     }
 }
 
-// ---------- API 路由 ----------
-app.get('/api/addresses', async (req, res) => {
-    try {
-        const addresses = await readAddresses();
-        res.json({ addresses });
-    } catch (err) {
-        res.status(500).json({ error: '读取地址列表失败' });
-    }
-});
-
-app.post('/api/addresses', async (req, res) => {
-    const { address } = req.body;
-    if (!address) return res.status(400).json({ error: '地址不能为空' });
-    if (!(address.startsWith('0x') || (address.startsWith('T') && address.length === 34))) {
-        return res.status(400).json({ error: '地址格式无效' });
-    }
-    try {
-        const addresses = await readAddresses();
-        if (addresses.includes(address)) {
-            return res.status(400).json({ error: '地址已存在' });
-        }
-        addresses.push(address);
-        await writeAddresses(addresses);
-        res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ error: '添加失败' });
-    }
-});
-
-app.delete('/api/addresses/:address', async (req, res) => {
-    const address = decodeURIComponent(req.params.address);
-    try {
-        let addresses = await readAddresses();
-        if (!addresses.includes(address)) {
-            return res.status(404).json({ error: '地址不存在' });
-        }
-        addresses = addresses.filter(a => a !== address);
-        await writeAddresses(addresses);
-        res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ error: '删除失败' });
-    }
-});
-
+// 批量查询余额
 app.post('/api/balances', async (req, res) => {
     const { addresses } = req.body;
     if (!addresses || !Array.isArray(addresses)) {
@@ -194,6 +141,7 @@ app.post('/api/balances', async (req, res) => {
     res.json(results);
 });
 
+// 查询单个地址的交易记录
 app.get('/api/transactions', async (req, res) => {
     const { address, limit = 30 } = req.query;
     if (!address) return res.status(400).json({ error: '地址不能为空' });
@@ -213,7 +161,9 @@ app.get('/api/transactions', async (req, res) => {
     }
 });
 
+// 启动服务
 app.listen(PORT, () => {
     console.log(`🚀 服务已启动: http://localhost:${PORT}`);
-    console.log(`📁 地址数据存储: ${DATA_FILE}`);
+    console.log(`📁 工具导航: http://localhost:${PORT}/`);
+    console.log(`💰 USDT 工具: http://localhost:${PORT}/usdt`);
 });
