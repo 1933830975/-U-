@@ -1,4 +1,8 @@
-const express = require('express');
+# 找到 app.get('/hacker', ...) 这段，删除或注释掉
+
+# 删除 index.html 中的黑客工具包卡片
+nano public/index.html
+# 找到包含 "黑客工具包" 的 <a> 标签，整行删除const express = require('express');
 const axios = require('axios');
 const path = require('path');
 const app = express();
