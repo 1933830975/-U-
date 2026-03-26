@@ -17,9 +17,10 @@ app.get('/usdt', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'tools', 'USDT', 'index.html'));
 });
 
-app.get('/hacker', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'tools', 'hacker', 'index.html'));
-});
+// 如果 hacker 文件夹已删除，则注释或删除以下路由
+// app.get('/hacker', (req, res) => {
+//     res.sendFile(path.join(__dirname, 'public', 'tools', 'hacker', 'index.html'));
+// });
 
 // ========== USDT 工具 API 路由 ==========
 const TRC_USDT_CONTRACT = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
@@ -160,52 +161,6 @@ app.get('/api/transactions', async (req, res) => {
     }
 });
 
-// ========== CVE 漏洞数据库代理 ==========
-const CVE_API_BASE = 'https://services.nvd.nist.gov/rest/json/cves/2.0';
-
-app.get('/api/cve', async (req, res) => {
-    const keyword = req.query.keyword;
-    const startIndex = parseInt(req.query.startIndex) || 0;
-    const resultsPerPage = 20;
-
-    if (!keyword) {
-        return res.status(400).json({ error: '需要提供搜索关键词' });
-    }
-
-    try {
-        const url = `${CVE_API_BASE}?keywordSearch=${encodeURIComponent(keyword)}&startIndex=${startIndex}&resultsPerPage=${resultsPerPage}`;
-        const response = await axios.get(url);
-        const data = response.data;
-
-        const vulnerabilities = data.vulnerabilities.map(vul => {
-            const cve = vul.cve;
-            const metrics = cve.metrics?.cvssMetricV31?.[0]?.cvssData || 
-                           cve.metrics?.cvssMetricV2?.[0]?.cvssData;
-            const score = metrics?.baseScore || 'N/A';
-            const severity = metrics?.baseSeverity || (score >= 7 ? 'HIGH' : score >= 4 ? 'MEDIUM' : 'LOW');
-            return {
-                id: cve.id,
-                description: cve.descriptions.find(d => d.lang === 'en')?.value || '无描述',
-                published: cve.published,
-                score: score,
-                severity: severity,
-                url: `https://nvd.nist.gov/vuln/detail/${cve.id}`
-            };
-        });
-
-        res.json({
-            success: true,
-            totalResults: data.totalResults,
-            results: vulnerabilities,
-            startIndex: data.startIndex,
-            resultsPerPage: data.resultsPerPage
-        });
-    } catch (err) {
-        console.error('CVE API 错误:', err.message);
-        res.status(500).json({ error: '查询失败，请稍后重试' });
-    }
-});
-
 // ========== 数据泄露查询（Have I Been Pwned） ==========
 const HIBP_API_BASE = 'https://haveibeenpwned.com/api/v3';
 const HIBP_API_KEY = process.env.HIBP_API_KEY;
@@ -265,5 +220,4 @@ app.listen(PORT, () => {
     console.log(`🚀 服务已启动: http://localhost:${PORT}`);
     console.log(`📁 工具导航: http://localhost:${PORT}/`);
     console.log(`💰 USDT 工具: http://localhost:${PORT}/usdt`);
-    console.log(`🔧 黑客工具: http://localhost:${PORT}/hacker`);
 });

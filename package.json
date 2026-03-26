@@ -1,7 +1,7 @@
 {
   "name": "usdt-tool",
   "version": "1.0.0",
-  "description": "霓虹工具箱 - USDT管理 + 黑客工具包",
+  "description": "霓虹工具箱 - USDT管理",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
