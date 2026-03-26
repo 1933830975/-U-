@@ -2,563 +2,87 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>USDT 地址管理器 | 霓虹终端</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工具导航 | 霓虹工具箱</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: radial-gradient(circle at 20% 30%, #0a0f1a, #03060c);
-            font-family: 'Share Tech Mono', 'Fira Code', 'Courier New', monospace;
+            font-family: 'Share Tech Mono', monospace;
             min-height: 100vh;
-            padding: 1.5rem;
+            padding: 2rem;
             color: #0ff;
-            position: relative;
         }
-
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 24px 24px;
-            pointer-events: none;
-            z-index: 0;
-        }
-
         .container {
-            max-width: 1300px;
+            max-width: 1200px;
             margin: 0 auto;
-            position: relative;
-            z-index: 2;
-            backdrop-filter: blur(2px);
         }
-
-        .header {
-            border-bottom: 2px solid #0ff;
-            padding-bottom: 1rem;
+        h1 {
+            font-size: 2.5rem;
+            text-align: center;
             margin-bottom: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            flex-wrap: wrap;
-            gap: 1rem;
+            text-shadow: 0 0 8px #0ff;
         }
-
-        .title {
-            font-size: 2rem;
-            font-weight: bold;
-            letter-spacing: 2px;
-            text-shadow: 0 0 6px #0ff;
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
         }
-
-        .stats {
-            font-size: 0.8rem;
-            background: #0a0f1a;
-            padding: 0.3rem 1rem;
-            border: 1px solid #0ff;
-            border-radius: 20px;
-        }
-
-        .card {
-            background: rgba(8, 16, 24, 0.75);
+        .tool-card {
+            background: rgba(8,16,24,0.7);
             backdrop-filter: blur(8px);
-            border: 1px solid rgba(0, 255, 255, 0.5);
-            border-radius: 20px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 0 18px rgba(0, 255, 255, 0.1);
-        }
-
-        .address-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-        }
-
-        .address-table th {
-            text-align: left;
-            padding: 0.8rem 0.5rem;
-            border-bottom: 2px solid #0ff;
-            color: #9effff;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .address-table td {
-            padding: 0.8rem 0.5rem;
-            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
-            font-family: monospace;
-            word-break: break-all;
-        }
-
-        .address-table tr:hover {
-            background: rgba(0, 255, 255, 0.08);
-        }
-
-        .chain-badge {
-            display: inline-block;
-            padding: 0.2rem 0.6rem;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        .trc { background: #0a6; color: #000; border: 1px solid #0ff; }
-        .erc { background: #a06; color: #fff; border: 1px solid #f0f; }
-
-        .action-btn {
-            background: rgba(0, 20, 30, 0.9);
-            border: 1.5px solid #0ff;
-            color: #0ff;
-            padding: 0.4rem 1rem;
-            font-family: monospace;
-            font-weight: bold;
-            border-radius: 40px;
-            cursor: pointer;
-            transition: 0.2s;
-            font-size: 0.8rem;
-            margin: 0 0.2rem;
-        }
-        .action-btn:hover {
-            background: #0ff;
-            color: #000;
-            box-shadow: 0 0 15px #0ff;
-        }
-
-        .delete-btn {
-            background: none;
-            border: 1px solid #ff3366;
-            color: #ff3366;
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.7rem;
-            transition: 0.2s;
-        }
-        .delete-btn:hover {
-            background: #ff3366;
-            color: #000;
-            box-shadow: 0 0 8px #ff3366;
-        }
-
-        .add-area {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            margin-top: 1rem;
-        }
-        .add-input {
-            flex: 3;
-            background: #010a12;
             border: 1px solid #0ff;
-            padding: 0.8rem 1rem;
-            font-family: monospace;
-            color: #0ff;
-            border-radius: 12px;
-            outline: none;
-        }
-        .add-input:focus {
-            border-color: #ff00cc;
-            box-shadow: 0 0 10px #ff00cc;
-        }
-
-        .summary {
-            display: flex;
-            justify-content: space-between;
-            gap: 1rem;
-            flex-wrap: wrap;
-            margin-bottom: 1rem;
-        }
-        .summary-item {
-            background: rgba(0, 20, 30, 0.6);
-            border-left: 4px solid #0ff;
-            padding: 0.8rem 1.5rem;
-            border-radius: 12px;
-            flex: 1;
-            min-width: 180px;
-        }
-        .summary-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .summary-value {
-            font-size: 1.6rem;
-            font-weight: bold;
-            word-break: break-word;
-        }
-
-        .error-msg {
-            background: rgba(255, 30, 80, 0.2);
-            border-left: 5px solid #ff3366;
-            padding: 0.8rem;
-            margin: 1rem 0;
-            border-radius: 10px;
-            color: #ff7b9c;
-        }
-
-        /* 模态框样式 */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(5px);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-content {
-            background: #0a0f1a;
-            border: 2px solid #0ff;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 1100px;
-            max-height: 80vh;
-            overflow: auto;
-            padding: 1rem;
-            box-shadow: 0 0 30px #0ff;
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 1px solid #0ff;
-            padding-bottom: 0.5rem;
-            margin-bottom: 1rem;
-        }
-        .close-modal {
-            background: none;
-            border: none;
-            color: #ff3366;
-            font-size: 1.5rem;
+            border-radius: 24px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: 0.3s;
             cursor: pointer;
         }
-        .tx-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.75rem;
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 20px #0ff;
+            border-color: #ff00cc;
         }
-        .tx-table th, .tx-table td {
-            border-bottom: 1px solid rgba(0,255,255,0.3);
-            padding: 0.5rem;
-            text-align: left;
+        .tool-card h2 {
+            font-size: 1.6rem;
+            margin-bottom: 0.5rem;
+            color: #0ff;
         }
-        .direction-in { color: #2effb0; }
-        .direction-out { color: #ff4d6d; }
-
-        @media (max-width: 700px) {
-            body { padding: 1rem; }
-            .summary-value { font-size: 1.2rem; }
-            .modal-content { width: 95%; }
-            .tx-table { font-size: 0.65rem; }
+        .tool-card p {
+            color: #9effff;
+            font-size: 0.9rem;
+        }
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        .footer {
+            margin-top: 3rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #0ff6;
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="header">
-        <div class="title">>_ USDT_Addr_Manager</div>
-        <div class="stats">⚡ 多链探针 | TRC20 + ERC20 | 支持交易记录</div>
+    <h1>>_ 霓虹工具箱</h1>
+    <div class="tools-grid">
+        <a href="/usdt" class="tool-card">
+            <h2>💰 USDT 地址管理器</h2>
+            <p>查询 TRC20 / ERC20 余额及交易记录 | 多地址管理</p>
+        </a>
+        <!-- 未来新工具在此添加卡片 -->
+        <!-- 
+        <a href="/newtool" class="tool-card">
+            <h2>📈 新工具名称</h2>
+            <p>功能描述</p>
+        </a>
+        -->
     </div>
-
-    <div class="summary" id="summaryArea">
-        <div class="summary-item"><div class="summary-label">TRC USDT 总余额</div><div class="summary-value" id="trcTotal">0.00</div></div>
-        <div class="summary-item"><div class="summary-label">ERC USDT 总余额</div><div class="summary-value" id="ercTotal">0.00</div></div>
-        <div class="summary-item"><div class="summary-label">当前页总余额</div><div class="summary-value" id="totalAll">0.00</div></div>
-    </div>
-
-    <div class="card">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
-            <span>📋 地址列表</span>
-            <button id="refreshBtn" class="action-btn" style="padding: 0.4rem 1rem;">⟳ 刷新余额</button>
-        </div>
-        <div style="overflow-x: auto;">
-            <table class="address-table" id="addressTable">
-                <thead>
-                    <tr><th>地址</th><th>链类型</th><th>USDT余额</th><th>TRX余额</th><th>操作</th></tr>
-                </thead>
-                <tbody id="addressTableBody">
-                    <tr><td colspan="5" style="text-align:center;">加载中...</td></tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="add-area">
-            <input type="text" id="newAddress" class="add-input" placeholder="输入 TRC20 (T开头) 或 ERC20 (0x开头) 地址">
-            <button id="addBtn" class="action-btn">+ 添加地址</button>
-        </div>
-    </div>
-    <div id="messageArea"></div>
-</div>
-
-<!-- 交易记录模态框 -->
-<div id="txModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <span>📜 交易记录 (最近30笔)</span>
-            <button class="close-modal">&times;</button>
-        </div>
-        <div id="txModalBody" style="overflow-x: auto;">
-            <table class="tx-table">
-                <thead>
-                    <tr><th>哈希</th><th>时间</th><th>发送方</th><th>接收方</th><th>金额(USDT)</th><th>方向</th></tr>
-                </thead>
-                <tbody id="txModalTableBody"></tbody>
-            </table>
-        </div>
+    <div class="footer">
+        ⚡ 工具持续更新 | 数据仅存储于本地
     </div>
 </div>
-
-<script>
-    const API_BASE = '/api';
-    let currentAddresses = [];
-
-    function showMessage(msg, isError = false) {
-        const msgDiv = document.getElementById('messageArea');
-        msgDiv.innerHTML = `<div class="${isError ? 'error-msg' : ''}" style="background:#021016; padding:0.6rem; border-radius:10px;">${escapeHtml(msg)}</div>`;
-        setTimeout(() => { if (msgDiv.innerHTML === `<div class="${isError ? 'error-msg' : ''}" style="background:#021016; padding:0.6rem; border-radius:10px;">${escapeHtml(msg)}</div>`) msgDiv.innerHTML = ''; }, 4000);
-    }
-
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
-
-    async function fetchAddresses() {
-        try {
-            const res = await fetch(`${API_BASE}/addresses`);
-            if (!res.ok) throw new Error('获取地址列表失败');
-            const data = await res.json();
-            currentAddresses = data.addresses || [];
-            renderAddressTable();
-            return currentAddresses;
-        } catch (err) {
-            showMessage('获取地址列表失败: ' + err.message, true);
-            return [];
-        }
-    }
-
-    async function refreshBalances() {
-        if (currentAddresses.length === 0) {
-            showMessage('暂无地址，请先添加');
-            updateSummary([]);
-            return;
-        }
-        showMessage('正在查询所有地址余额...');
-        try {
-            const res = await fetch(`${API_BASE}/balances`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ addresses: currentAddresses })
-            });
-            if (!res.ok) throw new Error('余额查询失败');
-            const balances = await res.json();
-            renderAddressTable(balances);
-            updateSummary(balances);
-        } catch (err) {
-            showMessage('余额刷新失败: ' + err.message, true);
-        }
-    }
-
-    function updateSummary(balances) {
-        let trcTotal = 0, ercTotal = 0;
-        balances.forEach(item => {
-            const usdt = parseFloat(item.usdtBalance) || 0;
-            if (item.type === 'trc') trcTotal += usdt;
-            else if (item.type === 'erc') ercTotal += usdt;
-        });
-        const totalAll = trcTotal + ercTotal;
-        document.getElementById('trcTotal').innerText = trcTotal.toFixed(6);
-        document.getElementById('ercTotal').innerText = ercTotal.toFixed(6);
-        document.getElementById('totalAll').innerText = totalAll.toFixed(6);
-    }
-
-    function renderAddressTable(balancesData = null) {
-        const tbody = document.getElementById('addressTableBody');
-        if (!currentAddresses.length) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">暂无地址，请添加</td></tr>';
-            return;
-        }
-
-        const balanceMap = {};
-        if (balancesData) {
-            balancesData.forEach(b => { balanceMap[b.address] = b; });
-        }
-
-        tbody.innerHTML = '';
-        currentAddresses.forEach(addr => {
-            const info = balanceMap[addr] || { usdtBalance: '?', trxBalance: '?', type: detectChainType(addr) };
-            const typeClass = info.type === 'trc' ? 'trc' : 'erc';
-            const typeLabel = info.type === 'trc' ? 'TRC20' : 'ERC20';
-            const usdtDisplay = info.usdtBalance !== undefined && info.usdtBalance !== null ? parseFloat(info.usdtBalance).toFixed(6) : '查询中';
-            const trxDisplay = info.type === 'trc' ? (info.trxBalance !== undefined ? parseFloat(info.trxBalance).toFixed(6) : '?') : '—';
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td title="${escapeHtml(addr)}">${escapeHtml(shortenAddress(addr))}</td>
-                <td><span class="chain-badge ${typeClass}">${typeLabel}</span></td>
-                <td>${usdtDisplay}</td>
-                <td>${trxDisplay}</td>
-                <td>
-                    <button class="action-btn tx-btn" data-addr="${escapeHtml(addr)}">📜 交易记录</button>
-                    <button class="delete-btn" data-addr="${escapeHtml(addr)}">删除</button>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
-
-        // 绑定交易记录按钮事件
-        document.querySelectorAll('.tx-btn').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const addr = btn.getAttribute('data-addr');
-                await showTransactions(addr);
-            });
-        });
-
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                const addr = btn.getAttribute('data-addr');
-                await deleteAddress(addr);
-            });
-        });
-    }
-
-    async function showTransactions(address) {
-        const modal = document.getElementById('txModal');
-        const tbody = document.getElementById('txModalTableBody');
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">加载中...</td></tr>';
-        modal.style.display = 'flex';
-
-        try {
-            const res = await fetch(`${API_BASE}/transactions?address=${encodeURIComponent(address)}&limit=30`);
-            if (!res.ok) throw new Error('获取交易记录失败');
-            const data = await res.json();
-            if (!data.success || !data.transactions.length) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">暂无交易记录</td></tr>';
-                return;
-            }
-            tbody.innerHTML = '';
-            data.transactions.forEach(tx => {
-                const shortHash = tx.hash.slice(0, 10) + '...' + tx.hash.slice(-8);
-                const fromShort = tx.from.slice(0, 8) + '...' + tx.from.slice(-6);
-                const toShort = tx.to.slice(0, 8) + '...' + tx.to.slice(-6);
-                const dirClass = tx.direction === 'IN' ? 'direction-in' : 'direction-out';
-                const dirText = tx.direction === 'IN' ? '⬇ 转入' : '⬆ 转出';
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td title="${escapeHtml(tx.hash)}">${escapeHtml(shortHash)}</td>
-                    <td>${escapeHtml(tx.timestamp)}</td>
-                    <td title="${escapeHtml(tx.from)}">${escapeHtml(fromShort)}</td>
-                    <td title="${escapeHtml(tx.to)}">${escapeHtml(toShort)}</td>
-                    <td>${escapeHtml(tx.value)}</td>
-                    <td class="${dirClass}">${dirText}</td>
-                `;
-                tbody.appendChild(row);
-            });
-        } catch (err) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#ff7b9c;">查询失败: ${escapeHtml(err.message)}</td></tr>`;
-        }
-    }
-
-    function shortenAddress(addr) {
-        if (!addr) return '';
-        if (addr.length <= 16) return addr;
-        return addr.slice(0, 8) + '...' + addr.slice(-6);
-    }
-
-    function detectChainType(address) {
-        if (address.startsWith('0x')) return 'erc';
-        if (address.startsWith('T') && address.length === 34) return 'trc';
-        return 'unknown';
-    }
-
-    async function addAddress(address) {
-        const type = detectChainType(address);
-        if (type === 'unknown') {
-            showMessage('地址格式无效，必须是TRC20(T开头34位)或ERC20(0x开头42位)', true);
-            return false;
-        }
-        try {
-            const res = await fetch(`${API_BASE}/addresses`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ address })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || '添加失败');
-            showMessage('地址添加成功');
-            await fetchAddresses();
-            await refreshBalances();
-            return true;
-        } catch (err) {
-            showMessage('添加失败: ' + err.message, true);
-            return false;
-        }
-    }
-
-    async function deleteAddress(address) {
-        if (!confirm(`确定要删除地址 ${address} 吗？`)) return;
-        try {
-            const res = await fetch(`${API_BASE}/addresses/${encodeURIComponent(address)}`, { method: 'DELETE' });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || '删除失败');
-            showMessage('地址已删除');
-            await fetchAddresses();
-            await refreshBalances();
-        } catch (err) {
-            showMessage('删除失败: ' + err.message, true);
-        }
-    }
-
-    async function init() {
-        await fetchAddresses();
-        if (currentAddresses.length > 0) {
-            await refreshBalances();
-        } else {
-            updateSummary([]);
-        }
-    }
-
-    // 模态框关闭
-    document.querySelector('.close-modal').addEventListener('click', () => {
-        document.getElementById('txModal').style.display = 'none';
-    });
-    window.onclick = function(event) {
-        const modal = document.getElementById('txModal');
-        if (event.target === modal) {
-            modal.style.display = 'none';
-        }
-    };
-
-    document.getElementById('refreshBtn').addEventListener('click', () => refreshBalances());
-    document.getElementById('addBtn').addEventListener('click', () => {
-        const addrInput = document.getElementById('newAddress');
-        const addr = addrInput.value.trim();
-        if (addr) {
-            addAddress(addr);
-            addrInput.value = '';
-        } else {
-            showMessage('请输入地址', true);
-        }
-    });
-
-    init();
-</script>
 </body>
 </html>
