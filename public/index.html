@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>霓虹工具箱 | 多链探针</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: radial-gradient(circle at 20% 30%, #0a0f1a, #03060c);
             font-family: 'Share Tech Mono', 'Fira Code', monospace;
@@ -17,72 +13,28 @@
             padding: 2rem;
             color: #0ff;
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-        h1 {
-            font-size: 2.5rem;
-            text-shadow: 0 0 8px #0ff;
-            margin-bottom: 0.5rem;
-        }
-        .subtitle {
-            color: #7cf9ff;
-            font-size: 0.9rem;
-            letter-spacing: 2px;
-        }
-        .tools-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 3rem; }
+        h1 { font-size: 2.5rem; text-shadow: 0 0 8px #0ff; margin-bottom: 0.5rem; }
+        .subtitle { color: #7cf9ff; font-size: 0.9rem; letter-spacing: 2px; }
+        .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
         .tool-card {
-            background: rgba(8, 16, 24, 0.7);
+            background: rgba(8,16,24,0.7);
             backdrop-filter: blur(8px);
             border: 1px solid #0ff;
             border-radius: 24px;
             padding: 1.5rem;
             text-align: center;
             transition: 0.3s;
-            cursor: pointer;
             text-decoration: none;
             display: block;
         }
-        .tool-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0 20px #0ff;
-            border-color: #ff00cc;
-        }
-        .tool-card h2 {
-            font-size: 1.6rem;
-            margin-bottom: 0.5rem;
-            color: #0ff;
-        }
-        .tool-card p {
-            color: #9effff;
-            font-size: 0.9rem;
-        }
-        .footer {
-            text-align: center;
-            font-size: 0.7rem;
-            color: #0ff6;
-            border-top: 1px dashed #0ff3;
-            padding-top: 1.5rem;
-            margin-top: 1rem;
-        }
-        a {
-            text-decoration: none;
-        }
-        @media (max-width: 700px) {
-            body { padding: 1rem; }
-            h1 { font-size: 1.8rem; }
-            .tool-card h2 { font-size: 1.3rem; }
-        }
+        .tool-card:hover { transform: translateY(-5px); box-shadow: 0 0 20px #0ff; border-color: #ff00cc; }
+        .tool-card h2 { font-size: 1.6rem; margin-bottom: 0.5rem; color: #0ff; }
+        .tool-card p { color: #9effff; font-size: 0.9rem; }
+        .footer { text-align: center; font-size: 0.7rem; color: #0ff6; border-top: 1px dashed #0ff3; padding-top: 1.5rem; margin-top: 1rem; }
+        a { text-decoration: none; }
+        @media (max-width: 700px) { body { padding: 1rem; } h1 { font-size: 1.8rem; } .tool-card h2 { font-size: 1.3rem; } }
     </style>
 </head>
 <body>
@@ -96,10 +48,10 @@
             <h2>💰 USDT 地址管理器</h2>
             <p>查询 TRC20 / ERC20 余额及交易记录 | 多地址管理 | 数据独立</p>
         </a>
-        <!-- 未来新工具在这里添加卡片 -->
     </div>
     <div class="footer">
         ⚡ 工具运行于免费云服务 | 15分钟无访问自动休眠<br>
+        
     </div>
 </div>
 </body>
