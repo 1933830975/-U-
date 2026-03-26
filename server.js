@@ -9,17 +9,14 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // ========== 工具路由 ==========
-// 导航首页
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// USDT 地址管理器（注意路径：public/tools/USDT/index.html）
 app.get('/usdt', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'tools', 'USDT', 'index.html'));
 });
 
-// 黑客工具包（路径：public/tools/hacker/index.html）
 app.get('/hacker', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'tools', 'hacker', 'index.html'));
 });
@@ -30,7 +27,6 @@ const TRONGRID_API = 'https://api.trongrid.io';
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 const ERC_USDT_CONTRACT = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
 
-// TRC20 余额查询
 async function getTrcBalance(address) {
     try {
         const url = `${TRONGRID_API}/v1/accounts/${address}`;
@@ -55,7 +51,6 @@ async function getTrcBalance(address) {
     }
 }
 
-// TRC20 交易记录
 async function getTrcTransactions(address, limit = 30) {
     try {
         const url = `${TRONGRID_API}/v1/accounts/${address}/transactions/trc20?limit=${limit}&contract_address=${TRC_USDT_CONTRACT}&only_confirmed=true`;
@@ -75,7 +70,6 @@ async function getTrcTransactions(address, limit = 30) {
     }
 }
 
-// ERC20 余额查询
 async function getErcBalance(address) {
     if (!ETHERSCAN_API_KEY) {
         return { usdtBalance: '0.000000', error: 'Etherscan API Key 未配置' };
@@ -96,7 +90,6 @@ async function getErcBalance(address) {
     }
 }
 
-// ERC20 交易记录
 async function getErcTransactions(address, limit = 30) {
     if (!ETHERSCAN_API_KEY) return [];
     try {
@@ -118,7 +111,6 @@ async function getErcTransactions(address, limit = 30) {
     }
 }
 
-// 批量查询余额
 app.post('/api/balances', async (req, res) => {
     const { addresses } = req.body;
     if (!addresses || !Array.isArray(addresses)) {
@@ -141,7 +133,6 @@ app.post('/api/balances', async (req, res) => {
     res.json(results);
 });
 
-// 查询单个地址的交易记录
 app.get('/api/transactions', async (req, res) => {
     const { address, limit = 30 } = req.query;
     if (!address) return res.status(400).json({ error: '地址不能为空' });
@@ -161,7 +152,6 @@ app.get('/api/transactions', async (req, res) => {
     }
 });
 
-// 启动服务
 app.listen(PORT, () => {
     console.log(`🚀 服务已启动: http://localhost:${PORT}`);
     console.log(`📁 工具导航: http://localhost:${PORT}/`);

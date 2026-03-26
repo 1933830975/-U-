@@ -6,7 +6,7 @@ const PORT = process.env.PORT || 3000;
 
 // 中间件
 app.use(express.json());
-app.use(express.static('public')); // 提供静态文件（CSS、图片等）
+app.use(express.static('public'));
 
 // ========== 工具路由 ==========
 // 导航首页
@@ -14,17 +14,17 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// USDT 地址管理器
+// USDT 地址管理器（注意路径：public/tools/USDT/index.html）
 app.get('/usdt', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'tools', 'USDT','hacker'， 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'tools', 'USDT', 'index.html'));
 });
 
-// 未来新工具只需添加类似路由，例如：
-// app.get('/price', (req, res) => {
-//     res.sendFile(path.join(__dirname, 'public', 'tools', 'price', 'index.html'));
-// });
+// 黑客工具包（路径：public/tools/hacker/index.html）
+app.get('/hacker', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'tools', 'hacker', 'index.html'));
+});
 
-// ========== API 路由（USDT 工具使用）==========
+// ========== USDT 工具 API 路由 ==========
 const TRC_USDT_CONTRACT = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
 const TRONGRID_API = 'https://api.trongrid.io';
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
@@ -166,4 +166,5 @@ app.listen(PORT, () => {
     console.log(`🚀 服务已启动: http://localhost:${PORT}`);
     console.log(`📁 工具导航: http://localhost:${PORT}/`);
     console.log(`💰 USDT 工具: http://localhost:${PORT}/usdt`);
+    console.log(`🔧 黑客工具: http://localhost:${PORT}/hacker`);
 });

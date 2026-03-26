@@ -10,306 +10,113 @@
             background: radial-gradient(circle at 20% 30%, #0a0f1a, #03060c);
             font-family: 'Share Tech Mono', 'Fira Code', monospace;
             min-height: 100vh;
-            padding: 1.5rem;
             color: #0ff;
-            position: relative;
         }
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: linear-gradient(rgba(0,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,255,0.03) 1px, transparent 1px);
-            background-size: 24px 24px;
-            pointer-events: none;
-            z-index: 0;
-        }
-        .container {
-            max-width: 1300px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 2;
-        }
-        .header {
-            border-bottom: 2px solid #0ff;
-            padding-bottom: 1rem;
-            margin-bottom: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        .title {
-            font-size: 2rem;
-            font-weight: bold;
-            letter-spacing: 2px;
-            text-shadow: 0 0 6px #0ff;
-        }
-        .stats {
-            font-size: 0.8rem;
-            background: #0a0f1a;
-            padding: 0.3rem 1rem;
-            border: 1px solid #0ff;
-            border-radius: 20px;
-        }
-        .tools-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .tool-card {
-            background: rgba(8,16,24,0.7);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(0,255,255,0.5);
-            border-radius: 20px;
-            padding: 1.2rem;
-            transition: 0.2s;
-        }
-        .tool-card h3 {
-            margin-bottom: 0.8rem;
-            color: #0ff;
-            border-left: 3px solid #0ff;
-            padding-left: 0.8rem;
-        }
-        .tool-card input, .tool-card textarea {
-            width: 100%;
-            background: #010a12;
-            border: 1px solid #0ff;
-            padding: 0.5rem;
-            color: #0ff;
-            font-family: monospace;
-            border-radius: 8px;
-            margin: 0.5rem 0;
-        }
-        .tool-card button {
-            background: rgba(0,20,30,0.9);
-            border: 1px solid #0ff;
-            color: #0ff;
-            padding: 0.4rem 1rem;
-            border-radius: 20px;
-            cursor: pointer;
-            font-family: monospace;
-            margin-right: 0.5rem;
-        }
-        .tool-card button:hover {
-            background: #0ff;
-            color: #000;
-            box-shadow: 0 0 8px #0ff;
-        }
-        .result {
-            background: #021016;
-            border-left: 3px solid #0ff;
-            padding: 0.5rem;
-            margin-top: 0.8rem;
-            font-size: 0.8rem;
-            word-break: break-all;
-            max-height: 200px;
+        .app { display: flex; height: 100vh; overflow: hidden; }
+        .sidebar {
+            width: 260px;
+            background: rgba(5, 15, 20, 0.85);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid #0ff;
             overflow-y: auto;
+            padding: 1rem 0;
         }
-        .footer {
+        .sidebar-header {
+            font-size: 1.2rem;
             text-align: center;
-            font-size: 0.7rem;
-            color: #0ff6;
-            border-top: 1px dashed #0ff3;
-            padding-top: 1.5rem;
+            padding: 1rem;
+            border-bottom: 1px solid #0ff;
+            margin-bottom: 1rem;
         }
-        @media (max-width: 700px) {
-            body { padding: 1rem; }
-            .title { font-size: 1.4rem; }
-            .tools-grid { grid-template-columns: 1fr; }
+        .tool-list { list-style: none; }
+        .tool-item {
+            padding: 0.6rem 1.2rem;
+            margin: 0.2rem 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
+        .tool-item:hover { background: rgba(0, 255, 255, 0.2); box-shadow: 0 0 6px #0ff; }
+        .tool-item.active { background: rgba(0, 255, 255, 0.3); border-left: 3px solid #0ff; }
+        .main { flex: 1; overflow-y: auto; padding: 1.5rem; }
+        .tool-content {
+            background: rgba(8, 16, 24, 0.6);
+            backdrop-filter: blur(4px);
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid #0ff;
+            min-height: 100%;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #021016; }
+        ::-webkit-scrollbar-thumb { background: #0ff; border-radius: 3px; }
+        @media (max-width: 700px) { .sidebar { width: 200px; } .tool-item { font-size: 0.8rem; padding: 0.4rem 0.8rem; } .main { padding: 1rem; } }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="header">
-        <div class="title">>_ HACKER_TOOLKIT</div>
-        <div class="stats">⚡ 网络安全工具集 | 纯前端实现</div>
+<div class="app">
+    <div class="sidebar">
+        <div class="sidebar-header">🔧 工具菜单</div>
+        <ul class="tool-list" id="toolList"></ul>
     </div>
-    <div class="tools-grid">
-        <!-- IP 查询 -->
-        <div class="tool-card">
-            <h3>🌐 IP 归属地查询</h3>
-            <input type="text" id="ipInput" placeholder="输入 IP 地址" value="">
-            <button id="ipBtn">查询</button>
-            <div class="result" id="ipResult">等待查询...</div>
+    <div class="main">
+        <div class="tool-content" id="toolContent">
+            <div style="text-align:center; padding: 2rem;">⚡ 请从左侧选择工具</div>
         </div>
-
-        <!-- 端口扫描模拟 -->
-        <div class="tool-card">
-            <h3>🔍 端口扫描 (模拟)</h3>
-            <input type="text" id="portTarget" placeholder="目标域名/IP" value="">
-            <button id="portBtn">扫描常用端口</button>
-            <div class="result" id="portResult">点击扫描（仅演示，不实际扫描）</div>
-        </div>
-
-        <!-- 密码强度检测 -->
-        <div class="tool-card">
-            <h3>🔐 密码强度检测</h3>
-            <input type="text" id="passwordInput" placeholder="输入密码">
-            <button id="pwdBtn">检测强度</button>
-            <div class="result" id="pwdResult">等待检测...</div>
-        </div>
-
-        <!-- MD5 加密 -->
-        <div class="tool-card">
-            <h3>🔒 MD5 哈希</h3>
-            <input type="text" id="md5Input" placeholder="输入文本">
-            <button id="md5Btn">计算 MD5</button>
-            <div class="result" id="md5Result">等待计算...</div>
-        </div>
-
-        <!-- Base64 编解码 -->
-        <div class="tool-card">
-            <h3>📦 Base64 编解码</h3>
-            <textarea rows="2" id="base64Input" placeholder="输入文本"></textarea>
-            <div>
-                <button id="base64EncodeBtn">编码</button>
-                <button id="base64DecodeBtn">解码</button>
-            </div>
-            <div class="result" id="base64Result">等待操作...</div>
-        </div>
-    </div>
-    <div class="footer">
-        ⚡ 工具仅供学习测试 | 端口扫描为模拟演示 | 所有数据本地处理
     </div>
 </div>
 
 <script>
-    // MD5 模拟（实际使用 Web Crypto API 的 SHA-256 取前32位）
-    async function md5(message) {
-        const msgBuffer = new TextEncoder().encode(message);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        return hashHex.substring(0, 32);
-    }
-
-    // IP 查询（使用 ip-api.com 免费API）
-    async function lookupIP(ip) {
-        const url = `http://ip-api.com/json/${ip}?fields=status,country,regionName,city,isp,query`;
+    let tools = [];
+    async function loadTools() {
         try {
-            const res = await fetch(url);
-            const data = await res.json();
-            if (data.status === 'success') {
-                return `IP: ${data.query}\n国家: ${data.country}\n地区: ${data.regionName}\n城市: ${data.city}\nISP: ${data.isp}`;
-            } else {
-                return '查询失败，IP可能无效或API限制';
-            }
+            const res = await fetch('/tools/hacker/tools.json');
+            tools = await res.json();
+            renderToolList();
+            if (tools.length) loadTool(tools[0]);
         } catch (err) {
-            return '网络错误，请稍后重试';
+            console.error('加载工具列表失败', err);
+            document.getElementById('toolList').innerHTML = '<li style="color:#ff3366">配置加载失败</li>';
         }
     }
-
-    // 端口扫描模拟
-    const commonPorts = [
-        { port: 21, service: 'FTP' },
-        { port: 22, service: 'SSH' },
-        { port: 23, service: 'Telnet' },
-        { port: 25, service: 'SMTP' },
-        { port: 80, service: 'HTTP' },
-        { port: 443, service: 'HTTPS' },
-        { port: 3306, service: 'MySQL' },
-        { port: 3389, service: 'RDP' },
-        { port: 8080, service: 'HTTP-Proxy' }
-    ];
-    function simulatePortScan(target) {
-        let result = `目标: ${target}\n模拟扫描结果 (仅演示):\n`;
-        commonPorts.forEach(p => {
-            const open = Math.random() > 0.6;
-            result += `${p.port} (${p.service}): ${open ? '开放' : '关闭'}\n`;
+    function renderToolList() {
+        const container = document.getElementById('toolList');
+        container.innerHTML = '';
+        tools.forEach((tool, idx) => {
+            const li = document.createElement('li');
+            li.className = 'tool-item';
+            li.innerHTML = `${tool.icon || '🔧'} ${tool.name}`;
+            li.addEventListener('click', () => {
+                document.querySelectorAll('.tool-item').forEach(item => item.classList.remove('active'));
+                li.classList.add('active');
+                loadTool(tool);
+            });
+            container.appendChild(li);
         });
-        result += '\n⚠️ 此功能为演示，未实际发送任何网络请求。';
-        return result;
+        if (container.firstChild) container.firstChild.classList.add('active');
     }
-
-    // 密码强度检测
-    function checkPasswordStrength(pwd) {
-        if (!pwd) return '请输入密码';
-        let strength = 0;
-        if (pwd.length >= 8) strength += 1;
-        if (/[a-z]/.test(pwd)) strength += 1;
-        if (/[A-Z]/.test(pwd)) strength += 1;
-        if (/[0-9]/.test(pwd)) strength += 1;
-        if (/[^a-zA-Z0-9]/.test(pwd)) strength += 1;
-        const level = ['极弱', '弱', '一般', '较强', '强', '极强'];
-        return `强度: ${level[strength]} (得分 ${strength}/5)`;
-    }
-
-    // Base64 操作
-    function base64Encode(str) {
+    async function loadTool(tool) {
+        const contentDiv = document.getElementById('toolContent');
+        contentDiv.innerHTML = '<div style="text-align:center; padding: 2rem;">⏳ 加载中...</div>';
         try {
-            return btoa(unescape(encodeURIComponent(str)));
-        } catch(e) {
-            return '编码失败，请检查输入';
+            const res = await fetch(`/tools/hacker/modules/${tool.module}`);
+            if (!res.ok) throw new Error('加载失败');
+            const html = await res.text();
+            contentDiv.innerHTML = html;
+            const scripts = contentDiv.querySelectorAll('script');
+            scripts.forEach(oldScript => {
+                const newScript = document.createElement('script');
+                newScript.textContent = oldScript.textContent;
+                oldScript.parentNode.replaceChild(newScript, oldScript);
+            });
+        } catch (err) {
+            contentDiv.innerHTML = `<div style="color:#ff3366; text-align:center;">❌ 加载失败: ${tool.name}</div>`;
         }
     }
-    function base64Decode(str) {
-        try {
-            return decodeURIComponent(escape(atob(str)));
-        } catch(e) {
-            return '解码失败，无效的 Base64 字符串';
-        }
-    }
-
-    // 事件绑定
-    document.getElementById('ipBtn').addEventListener('click', async () => {
-        const ip = document.getElementById('ipInput').value.trim();
-        if (!ip) {
-            document.getElementById('ipResult').innerText = '请输入 IP 地址';
-            return;
-        }
-        document.getElementById('ipResult').innerText = '查询中...';
-        const res = await lookupIP(ip);
-        document.getElementById('ipResult').innerText = res;
-    });
-
-    document.getElementById('portBtn').addEventListener('click', () => {
-        const target = document.getElementById('portTarget').value.trim() || 'localhost';
-        const res = simulatePortScan(target);
-        document.getElementById('portResult').innerText = res;
-    });
-
-    document.getElementById('pwdBtn').addEventListener('click', () => {
-        const pwd = document.getElementById('passwordInput').value;
-        const res = checkPasswordStrength(pwd);
-        document.getElementById('pwdResult').innerText = res;
-    });
-
-    document.getElementById('md5Btn').addEventListener('click', async () => {
-        const text = document.getElementById('md5Input').value;
-        if (!text) {
-            document.getElementById('md5Result').innerText = '请输入文本';
-            return;
-        }
-        document.getElementById('md5Result').innerText = '计算中...';
-        const hash = await md5(text);
-        document.getElementById('md5Result').innerText = `MD5 (模拟): ${hash}`;
-    });
-
-    document.getElementById('base64EncodeBtn').addEventListener('click', () => {
-        const text = document.getElementById('base64Input').value;
-        if (!text) {
-            document.getElementById('base64Result').innerText = '请输入文本';
-            return;
-        }
-        const encoded = base64Encode(text);
-        document.getElementById('base64Result').innerText = `编码结果: ${encoded}`;
-    });
-
-    document.getElementById('base64DecodeBtn').addEventListener('click', () => {
-        const text = document.getElementById('base64Input').value;
-        if (!text) {
-            document.getElementById('base64Result').innerText = '请输入 Base64 字符串';
-            return;
-        }
-        const decoded = base64Decode(text);
-        document.getElementById('base64Result').innerText = `解码结果: ${decoded}`;
-    });
+    loadTools();
 </script>
 </body>
 </html>

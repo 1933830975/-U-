@@ -1,0 +1,22 @@
+<div>
+    <h3>🔒 MD5 哈希</h3>
+    <input type="text" id="md5Input" placeholder="输入文本" style="width:100%; background:#010a12; border:1px solid #0ff; padding:0.5rem; color:#0ff; border-radius:8px; margin:0.5rem 0;">
+    <button id="md5Btn" style="background:#0a1a1f; border:1px solid #0ff; color:#0ff; padding:0.4rem 1rem; border-radius:20px; cursor:pointer;">计算 MD5</button>
+    <div id="md5Result" class="result" style="background:#021016; border-left:3px solid #0ff; padding:0.5rem; margin-top:0.8rem; font-size:0.8rem;">等待计算...</div>
+</div>
+<script>
+    async function md5(message) {
+        const msgBuffer = new TextEncoder().encode(message);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        return hashHex.substring(0, 32);
+    }
+    document.getElementById('md5Btn').addEventListener('click', async () => {
+        const text = document.getElementById('md5Input').value;
+        if (!text) { document.getElementById('md5Result').innerText = '请输入文本'; return; }
+        document.getElementById('md5Result').innerText = '计算中...';
+        const hash = await md5(text);
+        document.getElementById('md5Result').innerText = `MD5 (模拟): ${hash}`;
+    });
+</script>
