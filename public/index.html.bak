@@ -48,9 +48,12 @@
             <h2>💰 USDT 地址管理器</h2>
             <p>查询 TRC20 / ERC20 余额及交易记录 | 多地址管理 | 数据独立</p>
         </a>
-        <a href="/hacker" class="tool-card">
-            <h2>🔧 黑客工具包</h2>
-            <p>IP查询 | 端口扫描(模拟) | 密码强度检测 | 加密编解码</p>
+    </div>
+    </div>
+    <div class="tools-grid">
+        <a href="/usdt" class="tool-card">
+            <h2>待开发中...</h2>
+            <p>正在开发...</p>
         </a>
     </div>
     <div class="footer">
