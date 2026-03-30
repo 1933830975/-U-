@@ -56,8 +56,8 @@
             line-height: 1.5;
         }
         .error {
-            border-left-color: #ff6666;
             color: #ff6666;
+            border-left-color: #ff6666;
         }
         .flex-row {
             display: flex;
@@ -94,26 +94,17 @@
         return date.toLocaleString();
     }
 
-    // 解码 hex 地址为 base58（简化，直接显示原始 hex 或尝试转换）
-    function decodeAddress(addr) {
-        if (!addr) return '未知';
-        if (addr.startsWith('T')) return addr; // 已经是 base58
-        if (addr.startsWith('41')) {
-            // 十六进制地址，补 41 开头，这里简单返回带 0x 前缀
-            return '0x' + addr;
-        }
-        return addr;
-    }
-
     // 解析交易详情
     function parseTransaction(tx) {
-        if (!tx || !tx.txID) return '❌ 未找到交易记录';
+        if (!tx || !tx.txID) return '未找到交易记录';
 
+        // 基本信息
         const txid = tx.txID;
         const block = tx.blockNumber;
         const timestamp = formatTime(tx.timestamp);
-        const fee = (tx.fee || 0) / 1e6; // SUN -> TRX
+        const fee = (tx.fee || 0) / 1e6; // 单位 SUN -> TRX
 
+        // 获取合约调用信息
         let from = '未知';
         let to = '未知';
         let amount = 0;
@@ -123,24 +114,28 @@
         if (tx.raw_data && tx.raw_data.contract && tx.raw_data.contract[0]) {
             const contract = tx.raw_data.contract[0];
             contractType = contract.type;
-            const param = contract.parameter.value;
+            const parameter = contract.parameter.value;
 
             if (contractType === 'TransferContract') {
-                from = param.owner_address;
-                to = param.to_address;
-                amount = param.amount / 1e6;
+                // TRX 转账
+                from = parameter.owner_address;
+                to = parameter.to_address;
+                amount = parameter.amount / 1e6;
                 tokenType = 'TRX';
             } else if (contractType === 'TransferAssetContract') {
-                from = param.owner_address;
-                to = param.to_address;
-                amount = param.amount / 1e6;
-                tokenType = param.asset_name || 'TRC10';
+                // TRC10 代币
+                from = parameter.owner_address;
+                to = parameter.to_address;
+                amount = parameter.amount / 1e6;
+                tokenType = parameter.asset_name || 'TRC10';
             } else if (contractType === 'TriggerSmartContract') {
-                from = param.owner_address;
-                to = param.contract_address;
-                // 尝试解析 TRC20 转账 data
-                const data = param.data;
+                // TRC20 转账（需解析 data）
+                from = parameter.owner_address;
+                to = parameter.contract_address;
+                // 尝试解析 data 字段提取 TRC20 转账信息
+                const data = parameter.data;
                 if (data && data.length >= 136) {
+                    // 简单解析: 前 8 字节是函数选择器，接着 32 字节是 from 地址（去掉前缀），再 32 字节是 to，最后 32 字节是金额
                     const amountHex = data.slice(136, 200);
                     amount = parseInt(amountHex, 16) / 1e6;
                     tokenType = 'TRC20 (USDT等)';
@@ -148,14 +143,29 @@
             }
         }
 
+        // 解码 base58 地址（需要简单转换，这里直接显示原始地址）
+        const decodeAddress = (addr) => {
+            if (!addr) return '未知';
+            // 如果已经是 base58 格式，直接返回，否则尝试转换
+            if (addr.startsWith('T')) return addr;
+            if (addr.startsWith('41')) {
+                // 十六进制地址，补 41 开头，转换为 base58
+                // 简单起见，这里不实现完整转换，直接显示十六进制
+                return '0x' + addr;
+            }
+            return addr;
+        };
+
         from = decodeAddress(from);
         to = decodeAddress(to);
 
+        // 交易结果
         let status = '成功';
         if (tx.ret && tx.ret[0] && tx.ret[0].contractRet) {
             status = tx.ret[0].contractRet === 'SUCCESS' ? '成功' : '失败';
         }
 
+        // 构建输出文本
         let output = `交易哈希: ${txid}\n`;
         output += `区块高度: ${block}\n`;
         output += `时间: ${timestamp}\n`;
@@ -166,54 +176,52 @@
         output += `手续费: ${fee.toFixed(6)} TRX\n`;
         output += `状态: ${status}`;
 
+        // 添加额外信息（如有）
         if (tx.raw_data && tx.raw_data.data) {
             output += `\n附加数据: ${tx.raw_data.data}`;
         }
+
         return output;
     }
 
+    // 查询交易详情
     async function queryTransaction(txid) {
         const url = `https://api.trongrid.io/v1/transactions/${txid}`;
         try {
             const response = await fetch(url);
-            if (response.status === 404) {
-                return '❌ 未找到该交易哈希，请检查哈希是否正确，或交易尚未上链。';
-            }
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
             if (data.data && data.data.length > 0) {
-                return parseTransaction(data.data[0]);
+                const tx = data.data[0];
+                return parseTransaction(tx);
             } else {
-                return '❌ 未找到该交易记录。';
+                return '未找到该交易哈希，请检查输入是否正确。';
             }
         } catch (err) {
             console.error(err);
-            return `❌ 网络错误: ${err.message}`;
+            return `查询失败: ${err.message}`;
         }
     }
 
     queryBtn.addEventListener('click', async () => {
         const txid = txidInput.value.trim();
         if (!txid) {
-            resultDiv.innerHTML = '❌ 请输入交易哈希';
+            resultDiv.innerHTML = '请输入交易哈希';
             resultDiv.classList.add('error');
             return;
         }
+        // 简单校验长度（64位十六进制）
         if (!/^[a-fA-F0-9]{64}$/.test(txid)) {
-            resultDiv.innerHTML = '❌ 交易哈希格式不正确（应为64位十六进制字符串）';
+            resultDiv.innerHTML = '交易哈希格式不正确（应为64位十六进制字符串）';
             resultDiv.classList.add('error');
             return;
         }
-        resultDiv.innerHTML = '⏳ 查询中...';
+        resultDiv.innerHTML = '查询中...';
         resultDiv.classList.remove('error');
         const info = await queryTransaction(txid);
         resultDiv.innerHTML = info;
-        if (info.startsWith('❌')) {
+        if (info.includes('失败') || info.includes('未找到')) {
             resultDiv.classList.add('error');
-        } else {
-            resultDiv.classList.remove('error');
         }
     });
 </script>
