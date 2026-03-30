@@ -86,7 +86,7 @@
     const txidInput = document.getElementById('txid');
     const resultDiv = document.getElementById('result');
 
-    // 使用您自己的真实交易哈希作为示例（确保有效）
+    // 您自己的真实完整哈希（64位）
     const exampleHash = '50916a82651b66058eedfa1b661cbea2d05bd90d15255bd93beceeb462d36f34';
 
     function formatTime(timestamp) {
@@ -162,7 +162,7 @@
             resultDiv.classList.add('error');
             return;
         }
-        // 关键：严格校验64位十六进制
+        // 严格校验：必须是64位十六进制
         if (!/^[a-fA-F0-9]{64}$/.test(txid)) {
             resultDiv.innerHTML = '❌ 交易哈希格式不正确（应为64位十六进制字符串）';
             resultDiv.classList.add('error');
