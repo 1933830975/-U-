@@ -1,8 +1,4 @@
-# 找到 app.get('/hacker', ...) 这段，删除或注释掉
-
-# 删除 index.html 中的黑客工具包卡片
-nano public/index.html
-# 找到包含 "黑客工具包" 的 <a> 标签，整行删除const express = require('express');
+const express = require('express');
 const axios = require('axios');
 const path = require('path');
 const app = express();
@@ -12,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static('public'));
 
-// ========== 工具路由 ==========
+// 路由
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -21,12 +17,7 @@ app.get('/usdt', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'tools', 'USDT', 'index.html'));
 });
 
-// 如果 hacker 文件夹已删除，则注释或删除以下路由
-// app.get('/hacker', (req, res) => {
-//     res.sendFile(path.join(__dirname, 'public', 'tools', 'hacker', 'index.html'));
-// });
-
-// ========== USDT 工具 API 路由 ==========
+// ========== USDT 工具 API ==========
 const TRC_USDT_CONTRACT = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
 const TRONGRID_API = 'https://api.trongrid.io';
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
@@ -124,6 +115,7 @@ async function getErcTransactions(address, limit = 30) {
     }
 }
 
+// 批量查询余额
 app.post('/api/balances', async (req, res) => {
     const { addresses } = req.body;
     if (!addresses || !Array.isArray(addresses)) {
@@ -146,6 +138,7 @@ app.post('/api/balances', async (req, res) => {
     res.json(results);
 });
 
+// 交易记录查询
 app.get('/api/transactions', async (req, res) => {
     const { address, limit = 30 } = req.query;
     if (!address) return res.status(400).json({ error: '地址不能为空' });
@@ -162,60 +155,6 @@ app.get('/api/transactions', async (req, res) => {
         res.json({ success: true, transactions });
     } catch (err) {
         res.status(500).json({ error: '查询交易记录失败: ' + err.message });
-    }
-});
-
-// ========== 数据泄露查询（Have I Been Pwned） ==========
-const HIBP_API_BASE = 'https://haveibeenpwned.com/api/v3';
-const HIBP_API_KEY = process.env.HIBP_API_KEY;
-
-if (!HIBP_API_KEY) {
-    console.warn('⚠️ 警告: 未设置 HIBP_API_KEY，数据泄露查询将不可用');
-}
-
-app.get('/api/breach', async (req, res) => {
-    const account = req.query.account;
-    if (!account) {
-        return res.status(400).json({ error: '需要提供邮箱或手机号' });
-    }
-
-    if (!HIBP_API_KEY) {
-        return res.status(500).json({ error: '后端未配置 HIBP API Key' });
-    }
-
-    try {
-        const url = `${HIBP_API_BASE}/breachedaccount/${encodeURIComponent(account)}?truncateResponse=false`;
-        const response = await axios.get(url, {
-            headers: {
-                'hibp-api-key': HIBP_API_KEY,
-                'User-Agent': 'USDT-Toolbox'
-            }
-        });
-
-        const breaches = response.data;
-        const breachList = breaches.map(breach => ({
-            name: breach.Name,
-            title: breach.Title,
-            date: breach.BreachDate,
-            description: breach.Description,
-            addedDate: breach.AddedDate,
-            pwnCount: breach.PwnCount,
-            domains: breach.Domain
-        }));
-
-        res.json({
-            success: true,
-            pwned: true,
-            count: breachList.length,
-            breaches: breachList
-        });
-    } catch (error) {
-        if (error.response && error.response.status === 404) {
-            res.json({ success: true, pwned: false, count: 0, breaches: [] });
-        } else {
-            console.error('HIBP API 错误:', error.message);
-            res.status(500).json({ error: '查询失败，请稍后重试' });
-        }
     }
 });
 

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>TRON 交易哈希查询 | 霓虹终端</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: radial-gradient(circle at 20% 30%, #0a0f1a, #03060c);
+            font-family: 'Share Tech Mono', monospace;
+            min-height: 100vh;
+            padding: 1.5rem;
+            color: #0ff;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .card {
+            background: rgba(8,16,24,0.75);
+            backdrop-filter: blur(8px);
+            border: 1px solid #0ff;
+            border-radius: 24px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        input, button {
+            background: #010a12;
+            border: 1px solid #0ff;
+            padding: 0.7rem;
+            color: #0ff;
+            border-radius: 12px;
+            font-family: monospace;
+            width: 100%;
+            margin: 0.5rem 0;
+        }
+        button {
+            background: #0a1a1f;
+            cursor: pointer;
+            width: auto;
+            margin-right: 8px;
+        }
+        button:hover {
+            background: #0ff;
+            color: #000;
+        }
+        .result {
+            background: #021016;
+            border-left: 3px solid #0ff;
+            padding: 0.8rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            word-break: break-all;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+        .error {
+            color: #ff6666;
+            border-left-color: #ff6666;
+        }
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 8px 0;
+        }
+        @media (max-width: 700px) {
+            body { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <h2>🔍 TRON 交易哈希查询</h2>
+        <input type="text" id="txid" placeholder="输入波场交易哈希 (64位十六进制)" value="">
+        <div class="flex-row">
+            <button id="queryBtn">查询交易详情</button>
+        </div>
+        <div id="result" class="result">等待查询...</div>
+    </div>
+</div>
+
+<script>
+    const queryBtn = document.getElementById('queryBtn');
+    const txidInput = document.getElementById('txid');
+    const resultDiv = document.getElementById('result');
+
+    // 格式化时间戳
+    function formatTime(timestamp) {
+        if (!timestamp) return '未知';
+        const date = new Date(timestamp);
+        return date.toLocaleString();
+    }
+
+    // 解析交易详情
+    function parseTransaction(tx) {
+        if (!tx || !tx.txID) return '未找到交易记录';
+
+        // 基本信息
+        const txid = tx.txID;
+        const block = tx.blockNumber;
+        const timestamp = formatTime(tx.timestamp);
+        const fee = (tx.fee || 0) / 1e6; // 单位 SUN -> TRX
+
+        // 获取合约调用信息
+        let from = '未知';
+        let to = '未知';
+        let amount = 0;
+        let tokenType = 'TRX';
+        let contractType = '';
+
+        if (tx.raw_data && tx.raw_data.contract && tx.raw_data.contract[0]) {
+            const contract = tx.raw_data.contract[0];
+            contractType = contract.type;
+            const parameter = contract.parameter.value;
+
+            if (contractType === 'TransferContract') {
+                // TRX 转账
+                from = parameter.owner_address;
+                to = parameter.to_address;
+                amount = parameter.amount / 1e6;
+                tokenType = 'TRX';
+            } else if (contractType === 'TransferAssetContract') {
+                // TRC10 代币
+                from = parameter.owner_address;
+                to = parameter.to_address;
+                amount = parameter.amount / 1e6;
+                tokenType = parameter.asset_name || 'TRC10';
+            } else if (contractType === 'TriggerSmartContract') {
+                // TRC20 转账（需解析 data）
+                from = parameter.owner_address;
+                to = parameter.contract_address;
+                // 尝试解析 data 字段提取 TRC20 转账信息
+                const data = parameter.data;
+                if (data && data.length >= 136) {
+                    // 简单解析: 前 8 字节是函数选择器，接着 32 字节是 from 地址（去掉前缀），再 32 字节是 to，最后 32 字节是金额
+                    const amountHex = data.slice(136, 200);
+                    amount = parseInt(amountHex, 16) / 1e6;
+                    tokenType = 'TRC20 (USDT等)';
+                }
+            }
+        }
+
+        // 解码 base58 地址（需要简单转换，这里直接显示原始地址）
+        const decodeAddress = (addr) => {
+            if (!addr) return '未知';
+            // 如果已经是 base58 格式，直接返回，否则尝试转换
+            if (addr.startsWith('T')) return addr;
+            if (addr.startsWith('41')) {
+                // 十六进制地址，补 41 开头，转换为 base58
+                // 简单起见，这里不实现完整转换，直接显示十六进制
+                return '0x' + addr;
+            }
+            return addr;
+        };
+
+        from = decodeAddress(from);
+        to = decodeAddress(to);
+
+        // 交易结果
+        let status = '成功';
+        if (tx.ret && tx.ret[0] && tx.ret[0].contractRet) {
+            status = tx.ret[0].contractRet === 'SUCCESS' ? '成功' : '失败';
+        }
+
+        // 构建输出文本
+        let output = `交易哈希: ${txid}\n`;
+        output += `区块高度: ${block}\n`;
+        output += `时间: ${timestamp}\n`;
+        output += `合约类型: ${contractType}\n`;
+        output += `发送方: ${from}\n`;
+        output += `接收方: ${to}\n`;
+        output += `金额: ${amount.toFixed(6)} ${tokenType}\n`;
+        output += `手续费: ${fee.toFixed(6)} TRX\n`;
+        output += `状态: ${status}`;
+
+        // 添加额外信息（如有）
+        if (tx.raw_data && tx.raw_data.data) {
+            output += `\n附加数据: ${tx.raw_data.data}`;
+        }
+
+        return output;
+    }
+
+    // 查询交易详情
+    async function queryTransaction(txid) {
+        const url = `https://api.trongrid.io/v1/transactions/${txid}`;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            if (data.data && data.data.length > 0) {
+                const tx = data.data[0];
+                return parseTransaction(tx);
+            } else {
+                return '未找到该交易哈希，请检查输入是否正确。';
+            }
+        } catch (err) {
+            console.error(err);
+            return `查询失败: ${err.message}`;
+        }
+    }
+
+    queryBtn.addEventListener('click', async () => {
+        const txid = txidInput.value.trim();
+        if (!txid) {
+            resultDiv.innerHTML = '请输入交易哈希';
+            resultDiv.classList.add('error');
+            return;
+        }
+        // 简单校验长度（64位十六进制）
+        if (!/^[a-fA-F0-9]{64}$/.test(txid)) {
+            resultDiv.innerHTML = '交易哈希格式不正确（应为64位十六进制字符串）';
+            resultDiv.classList.add('error');
+            return;
+        }
+        resultDiv.innerHTML = '查询中...';
+        resultDiv.classList.remove('error');
+        const info = await queryTransaction(txid);
+        resultDiv.innerHTML = info;
+        if (info.includes('失败') || info.includes('未找到')) {
+            resultDiv.classList.add('error');
+        }
+    });
+</script>
+</body>
+</html>

@@ -49,7 +49,6 @@
             <p>查询 TRC20 / ERC20 余额及交易记录 | 多地址管理 | 数据独立</p>
         </a>
     </div>
-    </div>
     <div class="tools-grid">
         <a href="/usdt" class="tool-card">
             <h2>待开发中...</h2>
