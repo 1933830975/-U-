@@ -13,10 +13,7 @@
             padding: 1.5rem;
             color: #0ff;
         }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
+        .container { max-width: 900px; margin: 0 auto; }
         .card {
             background: rgba(8,16,24,0.75);
             backdrop-filter: blur(8px);
@@ -77,6 +74,7 @@
         <input type="text" id="txid" placeholder="输入波场交易哈希 (64位十六进制)" value="">
         <div class="flex-row">
             <button id="queryBtn">查询交易详情</button>
+            <button id="exampleBtn">示例哈希</button>
         </div>
         <div id="result" class="result">等待查询...</div>
     </div>
@@ -84,8 +82,12 @@
 
 <script>
     const queryBtn = document.getElementById('queryBtn');
+    const exampleBtn = document.getElementById('exampleBtn');
     const txidInput = document.getElementById('txid');
     const resultDiv = document.getElementById('result');
+
+    // 示例哈希（一个真实有效的交易）
+    const exampleHash = 'd494a87dbd72665797f7938d50554885d2f4929a2d07f9cbcfd4232f60cfb3b6';
 
     // 格式化时间戳
     function formatTime(timestamp) {
@@ -94,31 +96,24 @@
         return date.toLocaleString();
     }
 
-    // 解码 hex 地址为 base58（简化，直接显示原始 hex 或尝试转换）
+    // 解码地址
     function decodeAddress(addr) {
         if (!addr) return '未知';
-        if (addr.startsWith('T')) return addr; // 已经是 base58
-        if (addr.startsWith('41')) {
-            // 十六进制地址，补 41 开头，这里简单返回带 0x 前缀
-            return '0x' + addr;
-        }
+        if (addr.startsWith('T')) return addr;
+        if (addr.startsWith('41')) return '0x' + addr;
         return addr;
     }
 
-    // 解析交易详情
+    // 解析交易
     function parseTransaction(tx) {
         if (!tx || !tx.txID) return '❌ 未找到交易记录';
 
         const txid = tx.txID;
         const block = tx.blockNumber;
         const timestamp = formatTime(tx.timestamp);
-        const fee = (tx.fee || 0) / 1e6; // SUN -> TRX
+        const fee = (tx.fee || 0) / 1e6;
 
-        let from = '未知';
-        let to = '未知';
-        let amount = 0;
-        let tokenType = 'TRX';
-        let contractType = '';
+        let from = '未知', to = '未知', amount = 0, tokenType = 'TRX', contractType = '';
 
         if (tx.raw_data && tx.raw_data.contract && tx.raw_data.contract[0]) {
             const contract = tx.raw_data.contract[0];
@@ -138,7 +133,6 @@
             } else if (contractType === 'TriggerSmartContract') {
                 from = param.owner_address;
                 to = param.contract_address;
-                // 尝试解析 TRC20 转账 data
                 const data = param.data;
                 if (data && data.length >= 136) {
                     const amountHex = data.slice(136, 200);
@@ -166,9 +160,7 @@
         output += `手续费: ${fee.toFixed(6)} TRX\n`;
         output += `状态: ${status}`;
 
-        if (tx.raw_data && tx.raw_data.data) {
-            output += `\n附加数据: ${tx.raw_data.data}`;
-        }
+        if (tx.raw_data && tx.raw_data.data) output += `\n附加数据: ${tx.raw_data.data}`;
         return output;
     }
 
@@ -176,18 +168,11 @@
         const url = `https://api.trongrid.io/v1/transactions/${txid}`;
         try {
             const response = await fetch(url);
-            if (response.status === 404) {
-                return '❌ 未找到该交易哈希，请检查哈希是否正确，或交易尚未上链。';
-            }
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
+            if (response.status === 404) return '❌ 未找到该交易哈希，请检查哈希是否正确，或交易尚未上链。';
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
-            if (data.data && data.data.length > 0) {
-                return parseTransaction(data.data[0]);
-            } else {
-                return '❌ 未找到该交易记录。';
-            }
+            if (data.data && data.data.length > 0) return parseTransaction(data.data[0]);
+            return '❌ 未找到该交易记录。';
         } catch (err) {
             console.error(err);
             return `❌ 网络错误: ${err.message}`;
@@ -210,11 +195,14 @@
         resultDiv.classList.remove('error');
         const info = await queryTransaction(txid);
         resultDiv.innerHTML = info;
-        if (info.startsWith('❌')) {
-            resultDiv.classList.add('error');
-        } else {
-            resultDiv.classList.remove('error');
-        }
+        if (info.startsWith('❌')) resultDiv.classList.add('error');
+        else resultDiv.classList.remove('error');
+    });
+
+    exampleBtn.addEventListener('click', () => {
+        txidInput.value = exampleHash;
+        resultDiv.innerHTML = '示例哈希已填入，点击查询即可测试。';
+        resultDiv.classList.remove('error');
     });
 </script>
 </body>
