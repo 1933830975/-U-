@@ -89,14 +89,12 @@
     // 示例哈希（一个真实有效的交易）
     const exampleHash = 'd494a87dbd72665797f7938d50554885d2f4929a2d07f9cbcfd4232f60cfb3b6';
 
-    // 格式化时间戳
     function formatTime(timestamp) {
         if (!timestamp) return '未知';
         const date = new Date(timestamp);
         return date.toLocaleString();
     }
 
-    // 解码地址
     function decodeAddress(addr) {
         if (!addr) return '未知';
         if (addr.startsWith('T')) return addr;
@@ -104,7 +102,6 @@
         return addr;
     }
 
-    // 解析交易
     function parseTransaction(tx) {
         if (!tx || !tx.txID) return '❌ 未找到交易记录';
 

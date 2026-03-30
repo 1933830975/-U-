@@ -12,7 +12,9 @@ app.use(express.static('public'));
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
-
+app.get('/trxhash', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'tools', 'trxhash', 'index.html'));
+});
 app.get('/usdt', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'tools', 'USDT', 'index.html'));
 });

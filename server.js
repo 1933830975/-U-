@@ -8,15 +8,17 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static('public'));
 
-// 路由
+// ========== 工具路由 ==========
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
-app.get('/trxhash', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'tools', 'trxhash', 'index.html'));
-});
+
 app.get('/usdt', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'tools', 'USDT', 'index.html'));
+});
+
+app.get('/trxhash', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'tools', 'trxhash', 'index.html'));
 });
 
 // ========== USDT 工具 API ==========
@@ -160,9 +162,61 @@ app.get('/api/transactions', async (req, res) => {
     }
 });
 
+// ========== 数据泄露查询（Have I Been Pwned，可选） ==========
+// 如果不需要，可注释掉此部分；但保留不影响，只需环境变量 HIBP_API_KEY 未配置则返回错误
+const HIBP_API_BASE = 'https://haveibeenpwned.com/api/v3';
+const HIBP_API_KEY = process.env.HIBP_API_KEY;
+
+if (!HIBP_API_KEY) {
+    console.warn('⚠️ 警告: 未设置 HIBP_API_KEY，数据泄露查询将不可用');
+}
+
+app.get('/api/breach', async (req, res) => {
+    const account = req.query.account;
+    if (!account) {
+        return res.status(400).json({ error: '需要提供邮箱或手机号' });
+    }
+    if (!HIBP_API_KEY) {
+        return res.status(500).json({ error: '后端未配置 HIBP API Key' });
+    }
+    try {
+        const url = `${HIBP_API_BASE}/breachedaccount/${encodeURIComponent(account)}?truncateResponse=false`;
+        const response = await axios.get(url, {
+            headers: {
+                'hibp-api-key': HIBP_API_KEY,
+                'User-Agent': 'USDT-Toolbox'
+            }
+        });
+        const breaches = response.data;
+        const breachList = breaches.map(breach => ({
+            name: breach.Name,
+            title: breach.Title,
+            date: breach.BreachDate,
+            description: breach.Description,
+            addedDate: breach.AddedDate,
+            pwnCount: breach.PwnCount,
+            domains: breach.Domain
+        }));
+        res.json({
+            success: true,
+            pwned: true,
+            count: breachList.length,
+            breaches: breachList
+        });
+    } catch (error) {
+        if (error.response && error.response.status === 404) {
+            res.json({ success: true, pwned: false, count: 0, breaches: [] });
+        } else {
+            console.error('HIBP API 错误:', error.message);
+            res.status(500).json({ error: '查询失败，请稍后重试' });
+        }
+    }
+});
+
 // 启动服务
 app.listen(PORT, () => {
     console.log(`🚀 服务已启动: http://localhost:${PORT}`);
     console.log(`📁 工具导航: http://localhost:${PORT}/`);
     console.log(`💰 USDT 工具: http://localhost:${PORT}/usdt`);
+    console.log(`🔎 TRON 哈希查询: http://localhost:${PORT}/trxhash`);
 });
