@@ -95,7 +95,6 @@
         return date.toLocaleString();
     }
 
-    // 使用 Tronscan API 查询
     async function queryByTronscan(txid) {
         const url = `https://api.tronscan.org/api/transaction?hash=${txid}`;
         try {
@@ -110,14 +109,12 @@
         }
     }
 
-    // 解析 Tronscan 返回的数据
     function parseTronscanData(data) {
         const txid = data.txID;
         const block = data.block;
         const timestamp = formatTime(data.timestamp);
         const fee = (data.fee || 0) / 1e6;
 
-        // 获取转账信息
         let from = data.ownerAddress || '未知';
         let to = data.toAddress || '未知';
         let amount = 0;
@@ -129,7 +126,6 @@
             amount = (data.amount || 0) / Math.pow(10, data.tokenInfo.decimals || 6);
             tokenType = data.tokenInfo.tokenName;
         } else {
-            // 尝试从 contractData 中解析
             if (data.contractData) {
                 from = data.contractData.owner_address || from;
                 to = data.contractData.to_address || to;
@@ -152,7 +148,6 @@
     }
 
     async function queryTransaction(txid) {
-        // 先尝试 Tronscan API
         const tronscanData = await queryByTronscan(txid);
         if (tronscanData) {
             return parseTronscanData(tronscanData);
@@ -167,6 +162,7 @@
             resultDiv.classList.add('error');
             return;
         }
+        // 关键：严格校验64位十六进制
         if (!/^[a-fA-F0-9]{64}$/.test(txid)) {
             resultDiv.innerHTML = '❌ 交易哈希格式不正确（应为64位十六进制字符串）';
             resultDiv.classList.add('error');
